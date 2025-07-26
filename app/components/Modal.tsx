@@ -48,9 +48,19 @@ export default function Modal() {
       data.newsCategoryId = parseInt(data.newsCategoryId as string);
       if (modalMode === 'edit') data.id = selectedItem.id;
     } else if (activeSection === 'authors') {
-      data.totalViews = parseInt(data.totalViews as string);
-      data.totalPosts = parseInt(data.totalPosts as string);
+      data.totalViews = parseInt(data.totalViews as string) || 0;
+      data.totalPosts = parseInt(data.totalPosts as string) || 0;
+      data.followers = parseInt(data.followers as string) || 0;
+      data.expertise = data.expertise ? data.expertise.split(',').map((item: string) => item.trim()) : [];
+      data.achievements = data.achievements ? data.achievements.split(',').map((item: string) => item.trim()) : [];
       if (modalMode === 'edit') data.id = selectedItem.id;
+      // Удаляем пустые строки для необязательных полей
+      if (!data.bio) delete data.bio;
+      if (!data.color) delete data.color;
+      if (!data.telegram) delete data.telegram;
+      if (!data.linkedin) delete data.linkedin;
+      if (!data.twitter) delete data.twitter;
+      if (!data.email) delete data.email;
     } else if (activeSection === 'categories') {
       if (modalMode === 'edit') data.id = selectedItem.id;
     } else if (activeSection === 'reviews') {
@@ -252,33 +262,183 @@ export default function Modal() {
             </div>
           </div>
         );
-      case 'authors':
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Имя</label>
-              <input name="name" type="text" defaultValue={selectedItem?.name || ''} className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" required />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Биография</label>
-              <textarea name="bio" defaultValue={selectedItem?.bio || ''} className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" rows={4} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">URL аватара</label>
-              <input name="avatarUrl" type="text" defaultValue={selectedItem?.avatarUrl || ''} className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+        case 'authors':
+          return (
+            <div className="space-y-4">
+              {/* Имя */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Всего просмотров</label>
-                <input name="totalViews" type="number" defaultValue={selectedItem?.totalViews || 0} className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" />
+                <label className="block text-sm font-medium text-gray-700">Имя</label>
+                <input
+                  name="name"
+                  type="text"
+                  defaultValue={selectedItem?.name || ''}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              {/* Слаг */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Слаг</label>
+                <input
+                  name="slug"
+                  type="text"
+                  defaultValue={selectedItem?.slug || ''}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              {/* Аватар */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">URL аватара</label>
+                <input
+                  name="avatar"
+                  type="text"
+                  defaultValue={selectedItem?.avatar || ''}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              {/* Биография */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Биография</label>
+                <textarea
+                  name="bio"
+                  defaultValue={selectedItem?.bio || ''}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                  rows={4}
+                />
+              </div>
+              {/* Должность и опыт */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Должность</label>
+                  <input
+                    name="position"
+                    type="text"
+                    defaultValue={selectedItem?.position || ''}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Опыт</label>
+                  <input
+                    name="experience"
+                    type="text"
+                    defaultValue={selectedItem?.experience || ''}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+              {/* Подписчики и цвет */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Подписчики</label>
+                  <input
+                    name="followers"
+                    type="number"
+                    defaultValue={selectedItem?.followers || 0}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Цвет (hex)</label>
+                  <input
+                    name="color"
+                    type="text"
+                    defaultValue={selectedItem?.color || ''}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    placeholder="#FF5733"
+                  />
+                </div>
+              </div>
+              {/* Экспертиза и достижения */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Экспертиза (через запятую)</label>
+                <input
+                  name="expertise"
+                  type="text"
+                  defaultValue={selectedItem?.expertise?.join(', ') || ''}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Всего постов</label>
-                <input name="totalPosts" type="number" defaultValue={selectedItem?.totalPosts || 0} className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" />
+                <label className="block text-sm font-medium text-gray-700">Достижения (через запятую)</label>
+                <input
+                  name="achievements"
+                  type="text"
+                  defaultValue={selectedItem?.achievements?.join(', ') || ''}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              {/* Социальные сети */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Telegram</label>
+                  <input
+                    name="telegram"
+                    type="text"
+                    defaultValue={selectedItem?.telegram || ''}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    placeholder="@username"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">LinkedIn</label>
+                  <input
+                    name="linkedin"
+                    type="text"
+                    defaultValue={selectedItem?.linkedin || ''}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    placeholder="linkedin.com/in/username"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Twitter</label>
+                  <input
+                    name="twitter"
+                    type="text"
+                    defaultValue={selectedItem?.twitter || ''}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    placeholder="@username"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    name="email"
+                    type="email"
+                    defaultValue={selectedItem?.email || ''}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              {/* Метрики */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Всего просмотров</label>
+                  <input
+                    name="totalViews"
+                    type="number"
+                    defaultValue={selectedItem?.totalViews || 0}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Всего постов</label>
+                  <input
+                    name="totalPosts"
+                    type="number"
+                    defaultValue={selectedItem?.totalPosts || 0}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        );
+          );
       case 'categories':
         return (
           <div className="space-y-4">
@@ -391,8 +551,8 @@ export default function Modal() {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+<div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+<div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-gray-800">

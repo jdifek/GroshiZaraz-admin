@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { createContext, useState, ReactNode } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import { MFO, News, Author, Category, Review, Question, QuestionAnswer, License, Tag, NewsLike } from '../lib/types';
 
 interface DataContextType {
@@ -35,7 +37,7 @@ interface DataContextType {
   newsLikes: NewsLike[];
   setNewsLikes: (newsLikes: NewsLike[]) => void;
   handleDelete: (type: string, id: number) => void;
-  handleSave: (type: string, data: any) => void;
+  handleSave: (type: string, data: any) => Promise<void>;
 }
 
 export const DataContext = createContext<DataContextType>({
@@ -70,7 +72,7 @@ export const DataContext = createContext<DataContextType>({
   newsLikes: [],
   setNewsLikes: () => {},
   handleDelete: () => {},
-  handleSave: () => {},
+  handleSave: async () => {},
 });
 
 export function DataProvider({ children }: { children: ReactNode }) {
@@ -312,74 +314,79 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const handleSave = (type: string, data: any) => {
-    switch (type) {
-      case 'mfo':
+  const handleSave = async (type: string, data: any) => {
+    try {
+      if (type === 'author') {
+        console.log('Saving author:', data); // Для отладки
+        if (modalMode === 'create') {
+          const response = await axios.post('/api/authors', data);
+          console.log('API response:', response.data); // Для отладки
+          setAuthors([...authors, { ...data, id: response.data.id }]);
+          toast.success('Автор успешно создан!');
+        } else if (modalMode === 'edit' && data.id) {
+          await axios.put(`/api/authors/${data.id}`, data);
+          setAuthors(authors.map(item => (item.id === data.id ? data : item)));
+          toast.success('Автор успешно обновлен!');
+        }
+      } else if (type === 'mfo') {
         if (modalMode === 'create') {
           setMfos([...mfos, { ...data, id: mfos.length + 1, createdAt: new Date().toISOString() }]);
         } else {
-          setMfos(mfos.map(item => item.id === data.id ? data : item));
+          setMfos(mfos.map(item => (item.id === data.id ? data : item)));
         }
-        break;
-      case 'news':
+      } else if (type === 'news') {
         if (modalMode === 'create') {
           setNews([...news, { ...data, id: news.length + 1, createdAt: new Date().toISOString() }]);
         } else {
-          setNews(news.map(item => item.id === data.id ? data : item));
+          setNews(news.map(item => (item.id === data.id ? data : item)));
         }
-        break;
-      case 'author':
-        if (modalMode === 'create') {
-          setAuthors([...authors, { ...data, id: authors.length + 1 }]);
-        } else {
-          setAuthors(authors.map(item => item.id === data.id ? data : item));
-        }
-        break;
-      case 'category':
+      } else if (type === 'category') {
         if (modalMode === 'create') {
           setCategories([...categories, { ...data, id: categories.length + 1 }]);
         } else {
-          setCategories(categories.map(item => item.id === data.id ? data : item));
+          setCategories(categories.map(item => (item.id === data.id ? data : item)));
         }
-        break;
-      case 'review':
+      } else if (type === 'review') {
         if (modalMode === 'create') {
           setReviews([...reviews, { ...data, id: reviews.length + 1, createdAt: new Date().toISOString() }]);
         } else {
-          setReviews(reviews.map(item => item.id === data.id ? data : item));
+          setReviews(reviews.map(item => (item.id === data.id ? data : item)));
         }
-        break;
-      case 'question':
+      } else if (type === 'question') {
         if (modalMode === 'create') {
           setQuestions([...questions, { ...data, id: questions.length + 1, createdAt: new Date().toISOString() }]);
         } else {
-          setQuestions(questions.map(item => item.id === data.id ? data : item));
+          setQuestions(questions.map(item => (item.id === data.id ? data : item)));
         }
-        break;
-      case 'questionAnswer':
+      } else if (type === 'questionAnswer') {
         if (modalMode === 'create') {
           setQuestionAnswers([...questionAnswers, { ...data, id: questionAnswers.length + 1, createdAt: new Date().toISOString() }]);
         } else {
-          setQuestionAnswers(questionAnswers.map(item => item.id === data.id ? data : item));
+          setQuestionAnswers(questionAnswers.map(item => (item.id === data.id ? data : item)));
         }
-        break;
-      case 'license':
+      } else if (type === 'license') {
         if (modalMode === 'create') {
           setLicenses([...licenses, { ...data, id: licenses.length + 1 }]);
         } else {
-          setLicenses(licenses.map(item => item.id === data.id ? data : item));
+          setLicenses(licenses.map(item => (item.id === data.id ? data : item)));
         }
-        break;
-      case 'tag':
+      } else if (type === 'tag') {
         if (modalMode === 'create') {
           setTags([...tags, { ...data, id: tags.length + 1 }]);
         } else {
-          setTags(tags.map(item => item.id === data.id ? data : item));
+          setTags(tags.map(item => (item.id === data.id ? data : item)));
         }
-        break;
+      }
+      setIsModalOpen(false);
+      setSelectedItem(null);
+    } catch (error: any) {
+      console.error('Error saving data:', error); // Для отладки
+      const errorMessage =
+        error.response?.data?.errors?.map((e: any) => e.message).join(', ') ||
+        error.response?.data?.error ||
+        'Ошибка при сохранении данных';
+      toast.error(errorMessage);
     }
-    setIsModalOpen(false);
-    setSelectedItem(null);
   };
 
   return (

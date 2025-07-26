@@ -1,16 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import { useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, Trash2, FileText, Eye } from 'lucide-react';
-import { DataContext } from '../context/DataContext';
+import AuthorModal from '../components/AuthorModal';
 import { formatNumber } from '../utils/format';
 
 export default function AuthorsPage() {
-  const { authors, searchTerm, setSearchTerm, setIsModalOpen, setModalMode, setSelectedItem, handleDelete } = useContext(DataContext);
+  const [authors, setAuthors] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [selectedAuthor, setSelectedAuthor] = useState<any>(null);
 
-  const openModal = (mode: 'create' | 'edit', item: any = null) => {
+  // Fetch authors on mount
+  useEffect(() => {
+    fetchAuthors();
+  }, []);
+
+  const fetchAuthors = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/authors');
+      if (!response.ok) throw new Error('Failed to fetch authors');
+      const data = await response.json();
+      setAuthors(data);
+    } catch (error) {
+      console.error('Error fetching authors:', error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Вы уверены, что хотите удалить этого автора?')) return;
+    try {
+      const response = await fetch(`http://localhost:5000/api/authors/${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete author');
+      setAuthors(authors.filter(author => author.id !== id));
+    } catch (error) {
+      console.error('Error deleting author:', error);
+      alert('Ошибка при удалении автора');
+    }
+  };
+
+  const openModal = (mode: 'create' | 'edit', author: any = null) => {
     setModalMode(mode);
-    setSelectedItem(item);
+    setSelectedAuthor(author);
     setIsModalOpen(true);
   };
 
@@ -52,9 +84,10 @@ export default function AuthorsPage() {
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
                   {author.name.charAt(0)}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 relative">
                   <h3 className="text-xl font-bold text-gray-800 mb-1">{author.name}</h3>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{author.bio}</p>
+                  <p className="truncate text-gray-600 text-sm mb-3 max-w-3xs">{author.bio}</p>
+
                   <div className="flex items-center gap-4 text-sm text-gray-500">
                     <span className="flex items-center gap-1">
                       <FileText className="w-4 h-4" />
@@ -76,7 +109,7 @@ export default function AuthorsPage() {
                   Редактировать
                 </button>
                 <button
-                  onClick={() => handleDelete('author', author.id)}
+                  onClick={() => handleDelete(author.id)}
                   className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -85,6 +118,14 @@ export default function AuthorsPage() {
             </div>
           ))}
       </div>
+
+      <AuthorModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        mode={modalMode}
+        author={selectedAuthor}
+        onSubmitSuccess={fetchAuthors}
+      />
     </div>
   );
 }
