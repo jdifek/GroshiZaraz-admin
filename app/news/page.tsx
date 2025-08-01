@@ -1,17 +1,71 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
-import { useContext } from 'react';
-import { Search, Plus, Edit2, Trash2, Eye, Users, Calendar } from 'lucide-react';
-import { DataContext } from '../context/DataContext';
-import { formatNumber } from '../utils/format';
-
+"use client";
+import { useEffect, useState } from "react";
+import {
+  Search,
+  Plus,
+  Edit2,
+  Trash2,
+  Eye,
+  Users,
+  Calendar,
+} from "lucide-react";
+import NewsModal from "../components/NewsModal";
+import { formatNumber } from "../utils/format";
+import { Author } from "../services/authors/authorsTypes";
+import AuthorsService from "../services/authors/authorsService";
+import { News } from "../services/news/newsTypes";
+import NewsService from "../services/news/newsService";
+import CategoryService from "../services/categories/categoriesService";
+import { Category } from "../services/categories/categoriesTypes";
+import { toast } from "react-toastify";
 
 export default function NewsPage() {
-  const { news, searchTerm, setSearchTerm, setIsModalOpen, setModalMode, setSelectedItem, handleDelete } = useContext(DataContext);
+  const [news, setNews] = useState<News[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit" | "view">(
+    "create"
+  );
+  const [selectedNews, setSelectedNews] = useState<News | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
 
-  const openModal = (mode: 'create' | 'edit' | 'view', item: any = null) => {
+  useEffect(() => {
+    fetchNews();
+    fetchCategories();
+    fetchAuthors();
+  }, []);
+
+  const fetchNews = async () => {
+    const res = await NewsService.getAllNews();
+    setNews(res);
+  };
+
+  const fetchCategories = async () => {
+    const res = await CategoryService.getAllCategories();
+    setCategories(res);
+  };
+
+  const fetchAuthors = async () => {
+    const data = await AuthorsService.getAllAuthors();
+    setAuthors(data);
+  };
+
+ 
+const handleDelete = async (id: number) => {
+  try {
+    await NewsService.deleteNews(id);
+    toast.success("Новость удалена");
+    fetchNews();
+  } catch (error) {
+    console.error("Ошибка при удалении новости:", error);
+    toast.error("Не удалось удалить новость");
+  }
+};
+  const openModal = (mode: "create" | "edit" | "view", item: any = null) => {
     setModalMode(mode);
-    setSelectedItem(item);
+    setSelectedNews(item);
     setIsModalOpen(true);
   };
 
@@ -19,11 +73,13 @@ export default function NewsPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Управление новостями</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Управление новостями
+          </h1>
           <p className="text-gray-600">Создание и редактирование статей</p>
         </div>
         <button
-          onClick={() => openModal('create')}
+          onClick={() => openModal("create")}
           className="bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-6 rounded-xl font-medium hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
@@ -46,28 +102,38 @@ export default function NewsPage() {
 
       <div className="grid gap-6">
         {news
-          .filter(article => article.title.toLowerCase().includes(searchTerm.toLowerCase()))
-          .map(article => (
-            <div key={article.id} className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+          .filter((article) =>
+            article.title.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+          .map((article) => (
+            <div
+              key={article.id}
+              className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow"
+            >
               <div className="p-6">
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          article.published ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'
+                          article.published
+                            ? "bg-green-50 text-green-600"
+                            : "bg-yellow-50 text-yellow-600"
                         }`}
                       >
-                        {article.published ? 'Опубликовано' : 'Черновик'}
+                        {article.published ? "Опубликовано" : "Черновик"}
                       </span>
                       <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                        {article.NewsCategory?.name || 'Без категории'}
+                        {article.NewsCategory?.name || "Без категории"}
                       </span>
                     </div>
 
-                    <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2">{article.title}</h3>
-
-                    <p className="text-gray-600 mb-4 line-clamp-2">{article.body.substring(0, 150)}...</p>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2">
+                      {article.title}
+                    </h3>
+                    <p className="text-gray-600 mb-4 line-clamp-2">
+                      {article.body.substring(0, 150)}...
+                    </p>
 
                     <div className="flex items-center gap-6 text-sm text-gray-500">
                       <span className="flex items-center gap-1">
@@ -82,25 +148,27 @@ export default function NewsPage() {
                         <Calendar className="w-4 h-4" />
                         {new Date(article.createdAt).toLocaleDateString()}
                       </span>
-                      {article.readingMinutes && <span>⏱️ {article.readingMinutes} мин чтения</span>}
+                      {article.readingMinutes && (
+                        <span>⏱️ {article.readingMinutes} мин</span>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => openModal('view', article)}
+                      onClick={() => openModal("view", article)}
                       className="w-10 h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center transition-colors"
                     >
                       <Eye className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => openModal('edit', article)}
+                      onClick={() => openModal("edit", article)}
                       className="w-10 h-10 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center transition-colors"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete('news', article.id)}
+                      onClick={() => handleDelete(article.id)}
                       className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -111,6 +179,16 @@ export default function NewsPage() {
             </div>
           ))}
       </div>
+
+      <NewsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        mode={modalMode}
+        newsItem={selectedNews}
+        onSubmitSuccess={fetchNews}
+        categories={categories}
+        authors={authors}
+      />
     </div>
   );
 }

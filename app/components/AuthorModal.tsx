@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+import AuthorsService from '../services/authors/authorsService';
+import { toast } from 'react-toastify';
 
 interface AuthorModalProps {
   isOpen: boolean;
@@ -96,8 +98,11 @@ export default function AuthorModal({ isOpen, onClose, mode, author, onSubmitSuc
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+  
     try {
       const payload = {
         ...formData,
@@ -109,27 +114,20 @@ export default function AuthorModal({ isOpen, onClose, mode, author, onSubmitSuc
         totalViews: Number(formData.totalViews) || 0,
         totalPosts: Number(formData.totalPosts) || 0,
       };
-
-      const response = await fetch(
-        mode === 'create'
-          ? 'http://localhost:5000/api/authors'
-          : `http://localhost:5000/api/authors/${author?.id}`,
-        {
-          method: mode === 'create' ? 'POST' : 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to save author');
+  
+      if (mode === 'create') {
+        await AuthorsService.createAuthor(payload);
+        toast.success("Автор успешно создан");
+      } else {
+        await AuthorsService.updateAuthor(author?.id, payload);
+        toast.success("Автор успешно обновлён");
       }
-
-      onSubmitSuccess(); // Notify parent to refresh data
+  
+      onSubmitSuccess();
       onClose();
     } catch (error) {
-      console.error('Error submitting author:', error);
-      alert('Ошибка при сохранении автора');
+      console.error("Ошибка при сохранении автора:", error);
+      toast.error("Ошибка при сохранении автора");
     }
   };
 

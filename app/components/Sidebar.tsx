@@ -1,6 +1,6 @@
 "use client";
-import { useContext } from "react";
-import { useRouter } from "next/navigation";
+
+import { usePathname, useRouter } from "next/navigation";
 import {
   TrendingUp,
   Building2,
@@ -10,7 +10,6 @@ import {
   MessageSquare,
   Star,
 } from "lucide-react";
-import { DataContext } from "../context/DataContext";
 
 const sidebarItems = [
   { id: "dashboard", name: "Дашборд", icon: TrendingUp, path: "/" },
@@ -32,11 +31,10 @@ const sidebarItems = [
 ];
 
 export default function Sidebar() {
-  const { activeSection, setActiveSection } = useContext(DataContext);
   const router = useRouter();
+  const pathname = usePathname();
 
-  const handleNavigation = (id: string, path: string) => {
-    setActiveSection(id);
+  const handleNavigation = (path: string) => {
     router.push(path);
   };
 
@@ -46,20 +44,23 @@ export default function Sidebar() {
         <h2 className="text-xl font-bold text-gray-800">Админ-панель</h2>
       </div>
       <nav className="mt-4">
-        {sidebarItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => handleNavigation(item.id, item.path)}
-            className={`w-full flex items-center gap-3 px-6 py-3 text-sm font-medium ${
-              activeSection === item.id
-                ? "bg-blue-50 text-blue-600"
-                : "text-gray-600 hover:bg-gray-50"
-            } transition-colors`}
-          >
-            <item.icon className="w-5 h-5" />
-            {item.name}
-          </button>
-        ))}
+        {sidebarItems.map((item) => {
+          const isActive = pathname === item.path;
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNavigation(item.path)}
+              className={`w-full flex items-center gap-3 px-6 py-3 text-sm font-medium ${
+                isActive
+                  ? "bg-blue-50 text-blue-600"
+                  : "text-gray-600 hover:bg-gray-50"
+              } transition-colors`}
+            >
+              <item.icon className="w-5 h-5" />
+              {item.name}
+            </button>
+          );
+        })}
       </nav>
     </div>
   );

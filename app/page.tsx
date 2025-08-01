@@ -3,10 +3,44 @@ import { useContext } from "react";
 import { Building2, FileText, MessageSquare, Users } from "lucide-react";
 import { DataContext } from "./context/DataContext";
 import { formatNumber } from "./utils/format";
+import { useEffect, useState } from "react";
+import { Mfo } from "./services/mfos/mfoTypes";
+import MfoService from "./services/mfos/mfosService";
+import { toast } from "react-toastify";
+import NewsService from "./services/news/newsService";
 
 export default function DashboardPage() {
   const { setActiveSection } = useContext(DataContext);
+  const [mfos, setMfos] = useState<Mfo[]>([]);
+  const [totalViews, setTotalViews] = useState<number | null>(null);
+  const [totalNews, setTotalNews] = useState<number | null>(null);  const [error, setError] = useState(false);
+  const fetchMfos = async () => {
+    setError(false);
+    try {
+      const data = await MfoService.getAllMfos();
+      setMfos(data);
+    } catch {
+      toast.error("Ошибка при загрузке МФО");
+      setError(true);
+    } finally {
+    }
+  };
+  const fetchViews = async () => {
+    try {
+      const result = await NewsService.getNewsStatistic();
 
+      setTotalViews(result.totalViews.totalViews);
+      setTotalNews(result.totalViews.totalNews);
+        } catch {
+      toast.error("Ошибка при загрузке количества просмотров");
+    }
+  };
+
+
+  useEffect(() => {
+    fetchMfos();   
+    fetchViews();
+  }, []);
   return (
     <div className="space-y-8">
       <div>
@@ -22,7 +56,7 @@ export default function DashboardPage() {
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-xl">
               🏦
             </div>
-            <span className="text-3xl font-bold text-gray-800">1000</span>
+            <span className="text-3xl font-bold text-gray-800">{mfos.length}</span>
           </div>
           <h3 className="font-semibold text-gray-700">Всего МФО</h3>
           <p className="text-sm text-gray-500">Активных организаций</p>
@@ -33,7 +67,8 @@ export default function DashboardPage() {
             <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white text-xl">
               📰
             </div>
-            <span className="text-3xl font-bold text-gray-800">1000</span>
+            <span className="text-3xl font-bold text-gray-800">  {totalNews !== null ? formatNumber(totalNews) : "–"}
+            </span>
           </div>
           <h3 className="font-semibold text-gray-700">Статьи</h3>
           <p className="text-sm text-gray-500">Опубликованных материалов</p>
@@ -45,7 +80,7 @@ export default function DashboardPage() {
               👁️
             </div>
             <span className="text-3xl font-bold text-gray-800">
-              {formatNumber(1000)}
+            {totalViews !== null ? formatNumber(totalViews) : "–"}
             </span>
           </div>
           <h3 className="font-semibold text-gray-700">Просмотры</h3>
