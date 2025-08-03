@@ -54,13 +54,21 @@ export default function MfoModal({ isOpen, onClose, mode, mfo, onSubmitSuccess }
     }
   }, [mode, mfo]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, type, value, checked } = e.target;
-    setFormData(prev => ({
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, type, value } = e.target;
+  
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]:
+        type === "checkbox" && e.target instanceof HTMLInputElement
+          ? e.target.checked
+          : value,
     }));
   };
+  
+
 
   const numericFields: (keyof MfoPayload)[] = [
     'rating', 'reviews', 'minAmount', 'maxAmount', 'minTerm', 'maxTerm',
@@ -75,11 +83,11 @@ export default function MfoModal({ isOpen, onClose, mode, mfo, onSubmitSuccess }
       ...formData,
       ...numericFields.reduce((acc, key) => {
         const val = formData[key];
-        // Если значение есть, парсим в число, иначе оставляем как есть
         acc[key] = val !== '' ? Number(val) : 0;
         return acc;
-      }, {} as Partial<MfoPayload>),
-    };
+      }, {} as Record<string, number>),
+    } as MfoPayload;
+    
   
     try {
       if (mode === 'create') {
@@ -100,7 +108,7 @@ export default function MfoModal({ isOpen, onClose, mode, mfo, onSubmitSuccess }
 
   if (!isOpen) return null;
 
-  const renderInput = (label: string, name: keyof Mfo, type = 'text', step?: string | number, isTextarea = false) => (
+  const renderInput = (label: string, name: keyof MfoPayload, type = 'text', step?: string | number, isTextarea = false) => (
     <div>
       <label className="block text-sm font-medium text-gray-700">{label}</label>
       {isTextarea ? (
@@ -124,7 +132,7 @@ export default function MfoModal({ isOpen, onClose, mode, mfo, onSubmitSuccess }
     </div>
   );
 
-  const renderCheckbox = (label: string, name: keyof Mfo) => (
+  const renderCheckbox = (label: string, name: keyof MfoPayload) => (
     <div>
       <label className="block text-sm font-medium text-gray-700">{label}</label>
       <input

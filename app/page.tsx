@@ -8,9 +8,11 @@ import { Mfo } from "./services/mfos/mfoTypes";
 import MfoService from "./services/mfos/mfosService";
 import { toast } from "react-toastify";
 import NewsService from "./services/news/newsService";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const { setActiveSection } = useContext(DataContext);
+  const router = useRouter()
   const [mfos, setMfos] = useState<Mfo[]>([]);
   const [totalViews, setTotalViews] = useState<number | null>(null);
   const [totalNews, setTotalNews] = useState<number | null>(null);  const [error, setError] = useState(false);
@@ -105,29 +107,29 @@ export default function DashboardPage() {
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           <button
-            onClick={() => setActiveSection("mfos")}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 px-6 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            onClick={() => router.push("/mfos")}
+            className="bg-gradient-to-r cursor-pointer hover:scale-105 from-blue-500 to-blue-600 text-white py-4 px-6 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <Building2 className="w-6 h-6 mb-2 mx-auto" />
             Добавить МФО
           </button>
           <button
-            onClick={() => setActiveSection("news")}
-            className="bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-xl font-medium hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            onClick={() =>  router.push("/news")}
+            className="bg-gradient-to-r cursor-pointer hover:scale-105 from-green-500 to-green-600 text-white py-4 px-6 rounded-xl font-medium hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <FileText className="w-6 h-6 mb-2 mx-auto" />
             Создать статью
           </button>
           <button
-            onClick={() => setActiveSection("authors")}
-            className="bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 px-6 rounded-xl font-medium hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            onClick={() =>  router.push("/authors")}
+            className="bg-gradient-to-r cursor-pointer hover:scale-105 from-purple-500 to-purple-600 text-white py-4 px-6 rounded-xl font-medium hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <Users className="w-6 h-6 mb-2 mx-auto" />
             Добавить автора
           </button>
           <button
-            onClick={() => setActiveSection("reviews")}
-            className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-4 px-6 rounded-xl font-medium hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            onClick={() => router.push("/reviews")}
+            className="bg-gradient-to-r cursor-pointer hover:scale-105 from-yellow-500 to-yellow-600 text-white py-4 px-6 rounded-xl font-medium hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <MessageSquare className="w-6 h-6 mb-2 mx-auto" />
             Модерация

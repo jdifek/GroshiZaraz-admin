@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import { useState, useEffect } from "react";
 import { Search, Plus, Trash2, FileText, Eye } from "lucide-react";
 import AuthorModal from "../components/AuthorModal";
@@ -14,21 +15,29 @@ export default function AuthorsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetchAuthors();
   }, []);
 
   const fetchAuthors = async () => {
+    setIsLoading(true);
+    setError(false);
     try {
       const data = await AuthorsService.getAllAuthors();
       setAuthors(data);
     } catch (error) {
-      console.error("Error fetching authors:", error);
+      console.error("Ошибка при загрузке авторов:", error);
+      toast.error("Ошибка при загрузке авторов");
+      setError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
+
   const handleDelete = async (id: string) => {
-  
     try {
       await AuthorsService.deleteAuthor(id);
       setAuthors(authors.filter((author) => author.id !== Number(id)));
@@ -44,6 +53,10 @@ export default function AuthorsPage() {
     setSelectedAuthor(author);
     setIsModalOpen(true);
   };
+
+  const filteredAuthors = authors.filter((author) =>
+    author.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -77,11 +90,33 @@ export default function AuthorsPage() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {authors
-          .filter((author) =>
-            author.name.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-          .map((author) => (
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 animate-pulse space-y-4"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gray-200 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                  <div className="h-3 bg-gray-100 rounded w-3/4" />
+                  <div className="h-3 bg-gray-100 rounded w-2/3" />
+                </div>
+              </div>
+              <div className="h-3 bg-gray-100 rounded w-1/4 mt-4" />
+            </div>
+          ))
+        ) : error ? (
+          <div className="text-center text-red-500 text-sm bg-red-50 border border-red-100 rounded-xl p-4 col-span-2">
+            Произошла ошибка при загрузке авторов. Попробуйте позже.
+          </div>
+        ) : filteredAuthors.length === 0 ? (
+          <div className="text-center text-gray-500 text-sm bg-gray-50 border border-gray-100 rounded-xl p-4 col-span-2">
+            Авторы не найдены.
+          </div>
+        ) : (
+          filteredAuthors.map((author) => (
             <div
               key={author.id}
               className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow p-6"
@@ -97,7 +132,6 @@ export default function AuthorsPage() {
                   <p className="truncate text-gray-600 text-sm mb-3 max-w-3xs">
                     {author.bio}
                   </p>
-
                   <div className="flex items-center gap-4 text-sm text-gray-500">
                     <span className="flex items-center gap-1">
                       <FileText className="w-4 h-4" />
@@ -126,7 +160,8 @@ export default function AuthorsPage() {
                 </button>
               </div>
             </div>
-          ))}
+          ))
+        )}
       </div>
 
       <AuthorModal

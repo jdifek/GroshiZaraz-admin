@@ -11,74 +11,65 @@ export default function CategoriesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
-  );
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  // Загрузка категорий из API
+  // Загрузка категорий
   useEffect(() => {
     const fetchCategories = async () => {
+      setLoading(true);
+      setError(false);
       try {
-        const response = await CategoryService.getAllCategories()
+        const response = await CategoryService.getAllCategories();
         setCategories(response);
-        setLoading(false);
-      } catch (error) {
+      } catch (e) {
         toast.error("Ошибка при загрузке категорий");
+        setError(true);
+      } finally {
         setLoading(false);
       }
     };
     fetchCategories();
   }, []);
 
-  // Обработка удаления категории
   const handleDelete = async (id: number) => {
-  
     try {
       await CategoryService.deleteCategory(id);
-      setCategories(categories.filter((category) => category.id !== id));
-      toast.success("Категория успешно удалена");
-    } catch (error) {
-      toast.error("Ошибка при удалении категории");
-      console.error("Delete category error:", error);
+      setCategories(categories.filter((cat) => cat.id !== id));
+      toast.success("Категория удалена");
+    } catch (e) {
+      toast.error("Ошибка при удалении");
     }
   };
 
-  // Открытие модального окна
-  const openModal = (
-    mode: "create" | "edit",
-    category: Category | null = null
-  ) => {
+  const openModal = (mode: "create" | "edit", category: Category | null = null) => {
     setModalMode(mode);
     setSelectedCategory(category);
     setIsModalOpen(true);
   };
 
-  // Сохранение категории (вызывается из модального окна)
-  const handleSave = async (data: {
-    name: string;
-    icon?: string;
-    nameUk: string;
-  }) => {
+  const handleSave = async (data: { name: string; icon?: string; nameUk: string }) => {
     try {
       if (modalMode === "create") {
         const response = await CategoryService.createCategory(data);
         setCategories([...categories, response]);
-        toast.success("Категория успешно создана");
+        toast.success("Категория создана");
       } else if (modalMode === "edit" && selectedCategory) {
         const response = await CategoryService.updateCategory(selectedCategory.id, data);
         setCategories(categories.map((cat) => (cat.id === response.id ? response : cat)));
-        toast.success("Категория успешно обновлена");
+        toast.success("Категория обновлена");
       }
-  
       setIsModalOpen(false);
       setSelectedCategory(null);
-    } catch (error) {
-      console.error("Save category error:", error);
-      toast.error("Ошибка при сохранении категории");
+    } catch (e) {
+      toast.error("Ошибка при сохранении");
     }
   };
 
+  const filtered = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -115,11 +106,32 @@ export default function CategoriesPage() {
 
       {/* Categories Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categories
-          .filter((category) =>
-            category.name.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-          .map((category) => (
+        {loading ? (
+          Array.from({ length: 6 }).map((_, idx) => (
+            <div key={idx} className="animate-pulse bg-white rounded-2xl shadow-md border border-gray-100 p-6 space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gray-200 rounded-xl" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <div className="h-8 bg-gray-200 rounded-xl w-full" />
+                <div className="h-10 bg-gray-100 rounded-xl w-10" />
+              </div>
+            </div>
+          ))
+        ) : error ? (
+          <div className="col-span-full text-red-600 text-center">
+            Не удалось загрузить категории. Попробуйте позже.
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="col-span-full text-center text-gray-500">
+            Категории не найдены
+          </div>
+        ) : (
+          filtered.map((category) => (
             <div
               key={category.id}
               className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow p-6"
@@ -129,9 +141,7 @@ export default function CategoriesPage() {
                   {category.icon || "📂"}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-800">
-                    {category.name}
-                  </h3>
+                  <h3 className="text-lg font-bold text-gray-800">{category.name}</h3>
                   <p className="text-sm text-gray-500">ID: {category.id}</p>
                 </div>
               </div>
@@ -151,7 +161,8 @@ export default function CategoriesPage() {
                 </button>
               </div>
             </div>
-          ))}
+          ))
+        )}
       </div>
 
       {/* Modal */}

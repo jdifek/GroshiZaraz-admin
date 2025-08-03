@@ -30,17 +30,29 @@ export default function NewsPage() {
   const [selectedNews, setSelectedNews] = useState<News | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
-
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+  
+  const fetchNews = async () => {
+    setIsLoading(true);
+    setError(false);
+    try {
+      const res = await NewsService.getAllNews();
+      setNews(res);
+    } catch (err) {
+      console.error("Ошибка при загрузке новостей:", err);
+      toast.error("Ошибка при загрузке новостей");
+      setError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     fetchNews();
     fetchCategories();
     fetchAuthors();
   }, []);
 
-  const fetchNews = async () => {
-    const res = await NewsService.getAllNews();
-    setNews(res);
-  };
 
   const fetchCategories = async () => {
     const res = await CategoryService.getAllCategories();
@@ -68,6 +80,11 @@ const handleDelete = async (id: number) => {
     setSelectedNews(item);
     setIsModalOpen(true);
   };
+
+  const filteredNews = news.filter((article) =>
+    article.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
 
   return (
     <div className="space-y-6">
@@ -101,11 +118,29 @@ const handleDelete = async (id: number) => {
       </div>
 
       <div className="grid gap-6">
-        {news
-          .filter((article) =>
-            article.title.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-          .map((article) => (
+      {isLoading ? (
+  Array.from({ length: 3 }).map((_, i) => (
+    <div
+      key={i}
+      className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 animate-pulse space-y-4"
+    >
+      <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+      <div className="h-4 bg-gray-100 rounded w-1/3"></div>
+      <div className="h-4 bg-gray-100 rounded w-full"></div>
+      <div className="h-4 bg-gray-100 rounded w-2/3"></div>
+    </div>
+  ))
+) : error ? (
+  <div className="text-center text-red-500 text-sm bg-red-50 border border-red-100 rounded-xl p-4">
+    Произошла ошибка при загрузке новостей. Попробуйте позже.
+  </div>
+) : filteredNews.length === 0 ? (
+  <div className="text-center text-gray-500 text-sm bg-gray-50 border border-gray-100 rounded-xl p-4">
+    Новости не найдены.
+  </div>
+) : (
+  filteredNews.map((article) => (
+
             <div
               key={article.id}
               className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow"
@@ -177,7 +212,7 @@ const handleDelete = async (id: number) => {
                 </div>
               </div>
             </div>
-          ))}
+          )))}
       </div>
 
       <NewsModal
