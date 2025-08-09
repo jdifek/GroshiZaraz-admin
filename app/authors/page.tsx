@@ -8,6 +8,7 @@ import { formatNumber } from "../utils/format";
 import AuthorsService from "../services/authors/authorsService";
 import { Author } from "../services/authors/authorsTypes";
 import { toast } from "react-toastify";
+import { VioletButton } from "../ui/Buttons/VioletButton";
 
 export default function AuthorsPage() {
   const [authors, setAuthors] = useState<Author[]>([]);
@@ -67,13 +68,8 @@ export default function AuthorsPage() {
           </h1>
           <p className="text-gray-600">Добавление и редактирование авторов</p>
         </div>
-        <button
-          onClick={() => openModal("create")}
-          className="bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-6 rounded-xl font-medium hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Добавить автора
-        </button>
+        <VioletButton onClick={() => openModal("create")} />
+
       </div>
 
       <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">

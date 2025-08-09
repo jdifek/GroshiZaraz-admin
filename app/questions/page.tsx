@@ -1,17 +1,75 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import { useContext } from 'react';
-import { Search, Edit2, Trash2, Calendar, Plus } from 'lucide-react';
-import { DataContext } from '../context/DataContext';
+
+import { useEffect, useState } from 'react';
+import { Search, Edit2, Trash2, Calendar } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { SiteQuestion } from '../services/siteQuestions/siteQuestionsTypes';
+import SiteQuestionService from '../services/siteQuestions/SiteQuestionService';
+import QuestionModal from '../components/QuestionModal';
+import { BlueButton } from '../ui/Buttons/BlueButton';
 
 export default function QuestionsPage() {
-  const { questions, searchTerm, setSearchTerm, setIsModalOpen, setModalMode, setSelectedItem, handleDelete } = useContext(DataContext);
+  const [questions, setQuestions] = useState<SiteQuestion[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [selectedItem, setSelectedItem] = useState<SiteQuestion | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  const openModal = (mode: 'create' | 'edit', item: any = null) => {
+  const fetchQuestions = async () => {
+    setIsLoading(true);
+    setError(false);
+    try {
+      const data = await SiteQuestionService.getAllQuestions();
+      setQuestions(data);
+    } catch {
+      toast.error('Ошибка при загрузке вопросов');
+      setError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
+
+  const handleSave = async (data: Partial<SiteQuestion>) => {
+    try {
+      if (modalMode === 'create') {
+        await SiteQuestionService.createQuestion(data);
+      } else if (modalMode === 'edit' && selectedItem) {
+        await SiteQuestionService.updateQuestion(selectedItem.id, data);
+      }
+      setIsModalOpen(false);
+      setSelectedItem(null);
+      fetchQuestions();
+    } catch {
+      toast.error('Ошибка при сохранении вопроса');
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Удалить вопрос?')) return;
+    try {
+      await SiteQuestionService.deleteQuestion(id);
+      setQuestions(prev => prev.filter(q => q.id !== id));
+      toast.success('Вопрос удалён');
+    } catch {
+      toast.error('Ошибка при удалении');
+    }
+  };
+
+  const openModal = (mode: 'create' | 'edit', item: SiteQuestion | null = null) => {
     setModalMode(mode);
     setSelectedItem(item);
     setIsModalOpen(true);
   };
+
+  const filteredQuestions = questions.filter(q =>
+    q.textOriginal.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -20,13 +78,7 @@ export default function QuestionsPage() {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Управление вопросами</h1>
           <p className="text-gray-600">Модерация и управление вопросами пользователей</p>
         </div>
-        <button
-          onClick={() => openModal('create')}
-          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-6 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Добавить вопрос
-        </button>
+        <BlueButton onClick={() => openModal('create')} />
       </div>
 
       <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
@@ -43,10 +95,31 @@ export default function QuestionsPage() {
       </div>
 
       <div className="grid gap-6">
-        {questions
-          .filter(question => question.textOriginal.toLowerCase().includes(searchTerm.toLowerCase()))
-          .map(question => (
-            <div key={question.id} className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow p-6">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 animate-pulse space-y-4"
+            >
+              <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-4 bg-gray-100 rounded w-full"></div>
+              <div className="h-4 bg-gray-100 rounded w-5/6"></div>
+            </div>
+          ))
+        ) : error ? (
+          <div className="text-center text-red-500 text-sm bg-red-50 border border-red-100 rounded-xl p-4">
+            Произошла ошибка при загрузке вопросов. Попробуйте позже.
+          </div>
+        ) : filteredQuestions.length === 0 ? (
+          <div className="text-center text-gray-500 text-sm bg-gray-50 border border-gray-100 rounded-xl p-4">
+            Вопросы не найдены.
+          </div>
+        ) : (
+          filteredQuestions.map(question => (
+            <div
+              key={question.id}
+              className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow p-6"
+            >
               <div className="flex flex-col lg:flex-row gap-6">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
@@ -58,7 +131,7 @@ export default function QuestionsPage() {
                       {question.isModerated ? 'Одобрено' : 'На модерации'}
                     </span>
                     <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                      {question.targetType}
+                      {question.targetType ? 'Сайт' : 'Непонятно'}
                     </span>
                   </div>
 
@@ -81,7 +154,7 @@ export default function QuestionsPage() {
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete('question', question.id)}
+                    onClick={() => handleDelete(question.id)}
                     className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -89,8 +162,17 @@ export default function QuestionsPage() {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+        )}
       </div>
+
+      <QuestionModal
+        isOpen={isModalOpen}
+        mode={modalMode}
+        question={selectedItem}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+      />
     </div>
   );
 }

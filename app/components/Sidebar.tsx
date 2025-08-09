@@ -6,28 +6,41 @@ import {
   TrendingUp,
   Building2,
   FileText,
-  Users,
-  Tag,
   MessageSquare,
-  Star,
   ChevronDown,
   ChevronRight,
+  SatelliteDish,
 } from "lucide-react";
 
 const sidebarItems = [
   { id: "dashboard", name: "Дашборд", icon: TrendingUp, path: "/" },
   { id: "mfos", name: "МФО(укр доб)", icon: Building2, path: "/mfos" },
-  { id: "news", name: "Новости", icon: FileText, path: "/news" },
-  { id: "authors", name: "Авторы", icon: Users, path: "/authors" },
-  { id: "categories", name: "Категории новостей", icon: Tag, path: "/categories" },
-
+  {
+    id: "contentGroup",
+    name: "Контент",
+    icon: FileText,
+    children: [
+      { id: "news", name: "Новости", path: "/news" },
+      { id: "authors", name: "Авторы", path: "/authors" },
+      { id: "categories", name: "Категории новостей", path: "/categories" },
+    ],
+  },
+  {
+    id: "SatelliteMfo",
+    name: "Сателлиты",
+    icon: SatelliteDish,
+    children: [
+      { id: "questions", name: "Сателлиты МФО", path: "/satellite-mfo" },
+      { id: "questions-mfo", name: "Ключи Сателлиты МФО", path: "/satellite-keys-mfo" },
+    ],
+  },
   {
     id: "reviewsGroup",
     name: "Отзывы",
     icon: MessageSquare,
     children: [
       { id: "reviews", name: "Отзывы сайта", path: "/reviews" },
-      { id: "reviews-services", name: "Отзывы сервисов", path: "/reviews-services" },
+      { id: "reviews-mfo", name: "Отзывы МФО", path: "/reviews-mfo" },
     ],
   },
   {
@@ -36,16 +49,18 @@ const sidebarItems = [
     icon: MessageSquare,
     children: [
       { id: "questions", name: "Вопросы", path: "/questions" },
-      { id: "questions-services", name: "Вопросы сервисов", path: "/questions-services" },
+      { id: "questions-mfo", name: "Вопросы МФО", path: "/questions-mfo" },
     ],
   },
+ 
+ 
   {
     id: "answersGroup",
     name: "Ответы",
     icon: MessageSquare,
     children: [
       { id: "questionAnswers", name: "Ответы", path: "/questionAnswers" },
-      { id: "questionAnswers-services", name: "Ответы сервисов", path: "/questionAnswers-services" },
+      { id: "questionAnswers-mfo", name: "Ответы МФО", path: "/questionAnswers-mfo" },
     ],
   },
 
@@ -65,7 +80,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-64 bg-white shadow-md border-r border-gray-200">
+    <div className="w-64 bg-white shadow-md border-r border-gray-200 h-screen scrollbar-none overflow-y-auto">
        <div  className="flex items-center space-x-2 p-6">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-yellow-400 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
               GZ
@@ -100,7 +115,7 @@ export default function Sidebar() {
                         <button
                           key={sub.id}
                           onClick={() => handleNavigation(sub.path)}
-                          className={`w-full text-left text-sm px-4 py-2 rounded-md ${
+                          className={`w-full cursor-pointer text-left text-sm px-4 py-2 rounded-md ${
                             isSubActive
                               ? "bg-blue-50 text-blue-600"
                               : "text-gray-600 hover:bg-gray-100"

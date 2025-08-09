@@ -174,8 +174,8 @@ export default function NewsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center overflow-auto px-4">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-xl relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center  overflow-auto px-4">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-xl relative max-h-[90vh] scrollbar-none overflow-y-auto">
         <h2 className="text-black text-2xl font-bold mb-4">
           {mode === "edit" ? "Редактировать новость" : "Добавить новость"}
         </h2>

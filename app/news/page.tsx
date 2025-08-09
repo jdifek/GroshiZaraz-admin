@@ -19,6 +19,7 @@ import NewsService from "../services/news/newsService";
 import CategoryService from "../services/categories/categoriesService";
 import { Category } from "../services/categories/categoriesTypes";
 import { toast } from "react-toastify";
+import { GreenButton } from "../ui/Buttons/GreenButton";
 
 export default function NewsPage() {
   const [news, setNews] = useState<News[]>([]);
@@ -95,13 +96,8 @@ const handleDelete = async (id: number) => {
           </h1>
           <p className="text-gray-600">Создание и редактирование статей</p>
         </div>
-        <button
-          onClick={() => openModal("create")}
-          className="bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-6 rounded-xl font-medium hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Создать статью
-        </button>
+        <GreenButton onClick={() => openModal("create")} />
+
       </div>
 
       <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">

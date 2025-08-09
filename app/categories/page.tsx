@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import CategoryModal from "../components/CategoryModal";
 import { Category } from "../services/categories/categoriesTypes";
 import CategoryService from "../services/categories/categoriesService";
+import { OrangeButton } from "../ui/Buttons/OrangeButton";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -81,13 +82,8 @@ export default function CategoriesPage() {
           </h1>
           <p className="text-gray-600">Управление категориями для статей</p>
         </div>
-        <button
-          onClick={() => openModal("create")}
-          className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-3 px-6 rounded-xl font-medium hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 shadow-lg flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Добавить категорию
-        </button>
+        <OrangeButton onClick={() => openModal("create")} />
+
       </div>
 
       {/* Search */}

@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Plus, Edit2, Trash2, Star } from "lucide-react";
+import { Search, Edit2, Trash2, Star } from "lucide-react";
 import { toast } from "react-toastify";
 import { Mfo } from "../services/mfos/mfoTypes";
 import MfoService from "../services/mfos/mfosService";
 import MfoModal from "../components/MfoModal";
 import Image from "next/image";
+import { BlueButton } from "../ui/Buttons/BlueButton";
 
 export default function MfosPage() {
   const [mfos, setMfos] = useState<Mfo[]>([]);
@@ -66,13 +67,7 @@ export default function MfosPage() {
             Список всех микрофинансовых организаций
           </p>
         </div>
-        <button
-          onClick={() => openModal("create")}
-          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-6 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Добавить МФО
-        </button>
+        <BlueButton onClick={() => openModal("create")} />
       </div>
 
       <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 w-full">
@@ -118,7 +113,7 @@ export default function MfosPage() {
               <div className="p-6">
                 <div className="flex flex-col lg:flex-row lg:items-center gap-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-2xl overflow-hiddenflex items-center justify-center">
                       <Image
                         unoptimized
                         src={mfo.logo}

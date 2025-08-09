@@ -147,7 +147,7 @@ export default function MfoModal({ isOpen, onClose, mode, mfo, onSubmitSuccess }
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] scrollbar-none overflow-y-auto">
         <div className="p-6 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-800">
             {mode === 'create' ? 'Добавить МФО' : 'Редактировать МФО'}

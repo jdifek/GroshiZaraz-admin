@@ -1,6 +1,5 @@
 // app/layout.tsx
 import { ToastContainer } from "react-toastify";
-import Modal from "./components/Modal";
 import Sidebar from "./components/Sidebar";
 import { DataProvider } from "./context/DataContext";
 import "./globals.css";
@@ -12,17 +11,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <DataProvider>
-          <div className="flex min-h-screen bg-gray-50">
-            <Sidebar />
-            <ToastContainer position="top-right" autoClose={3000} />
-
-            <div className="flex-1 p-8">{children}</div>
-            <Modal />
+    <body className="overflow-hidden"> {/* <== запрещаем глобальный скролл */}
+      <DataProvider>
+        <div className=" bg-gray-50 flex h-screen overflow-hidden">
+          {/* Sidebar — прокручиваемая колонка */}
+          <div className="h-full overflow-y-auto scrollbar-none">
+          <Sidebar />
           </div>
-        </DataProvider>
-      </body>
-    </html>
+  
+          {/* Main content — правая часть */}
+            <div className="flex-1 min-h-screen overflow-y-auto p-8 scrollbar-none">
+            <ToastContainer position="top-right" autoClose={3000} />
+            {children}
+          </div>
+  
+        </div>
+      </DataProvider>
+    </body>
+  </html>
+  
   );
 }
