@@ -48,8 +48,8 @@ const sidebarItems = [
     name: "Вопросы",
     icon: MessageSquare,
     children: [
-      { id: "questions", name: "Вопросы", path: "/questions" },
-      { id: "questions-mfo", name: "Вопросы МФО", path: "/questions-mfo" },
+      { id: "questions", name: "Вопросы общие", path: "/questions" },
+      { id: "questions-mfo", name: "Вопросы сайта", path: "/questions-mfo" },
     ],
   },
  

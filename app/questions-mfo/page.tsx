@@ -10,30 +10,24 @@ import {
   Tag,
   User,
   Mail,
-  Building2,
-  Star,
-  Users,
-  Clock,
   Globe,
-  CheckCircle,
-  AlertCircle,
-  Phone,
-  ExternalLink
+  HelpCircle,
+  Clock
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { SiteQuestion } from "../services/siteQuestions/siteQuestionsTypes";
+import SiteQuestionService from "../services/siteQuestions/SiteQuestionService";
 import QuestionModal from "../components/QuestionModal";
 import { BlueButton } from "../ui/Buttons/BlueButton";
 import { TrashButton } from "../ui/Buttons/TrashButton";
 import { EditButton } from "../ui/Buttons/EditButton";
-import QuestionService from "../services/Question/QuestionService";
-import { Question } from "../services/Question/questionTypes";
 
-export default function QuestionsPage() {
-  const [questions, setQuestions] = useState<Question[]>([]);
+export default function QuestionsServicePage() {
+  const [questions, setQuestions] = useState<SiteQuestion[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [selectedItem, setSelectedItem] = useState<Question | null>(null);
+  const [selectedItem, setSelectedItem] = useState<SiteQuestion | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
@@ -42,7 +36,7 @@ export default function QuestionsPage() {
     setIsLoading(true);
     setError(false);
     try {
-      const data = await QuestionService.getAllQuestions();
+      const data = await SiteQuestionService.getAllQuestions();
       setQuestions(data);
     } catch {
       toast.error("Ошибка при загрузке вопросов");
@@ -56,12 +50,12 @@ export default function QuestionsPage() {
     fetchQuestions();
   }, []);
 
-  const handleSave = async (data: Partial<Question>) => {
+  const handleSave = async (data: Partial<SiteQuestion>) => {
     try {
       if (modalMode === "create") {
-        await QuestionService.createQuestion(data);
+        await SiteQuestionService.createQuestion(data);
       } else if (modalMode === "edit" && selectedItem) {
-        await QuestionService.updateQuestion(selectedItem.id, data);
+        await SiteQuestionService.updateQuestion(selectedItem.id, data);
       }
       setIsModalOpen(false);
       setSelectedItem(null);
@@ -74,7 +68,7 @@ export default function QuestionsPage() {
   const handleDelete = async (id: number) => {
     if (!confirm("Удалить вопрос?")) return;
     try {
-      await QuestionService.deleteQuestion(id);
+      await SiteQuestionService.deleteQuestion(id);
       setQuestions((prev) => prev.filter((q) => q.id !== id));
       toast.success("Вопрос удалён");
     } catch {
@@ -84,7 +78,7 @@ export default function QuestionsPage() {
 
   const openModal = (
     mode: "create" | "edit",
-    item: Question | null = null
+    item: SiteQuestion | null = null
   ) => {
     setModalMode(mode);
     setSelectedItem(item);
@@ -99,7 +93,8 @@ export default function QuestionsPage() {
     q.textOriginal.toLowerCase().includes(searchTerm.toLowerCase()) ||
     q.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     q.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    q.subject?.toLowerCase().includes(searchTerm.toLowerCase())
+    q.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    q.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -108,10 +103,10 @@ export default function QuestionsPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-1">
-            Управление общими вопросами
+            Управление вопросами сайта
           </h1>
           <p className="text-gray-600">
-            Модерация и управление вопросами пользователей ({questions.length})
+            Модерация и управление вопросами пользователей о сайте ({questions.length})
           </p>
         </div>
         <BlueButton text="Добавить вопрос" onClick={() => openModal("create")} />
@@ -123,7 +118,7 @@ export default function QuestionsPage() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Поиск вопросов, имён, email..."
+            placeholder="Поиск вопросов, имён, email, категорий..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -166,8 +161,8 @@ export default function QuestionsPage() {
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-start gap-4 flex-1">
-                      <div className="p-3 bg-blue-50 rounded-xl">
-                        <MessageSquare className="w-6 h-6 text-blue-600" />
+                      <div className="p-3 bg-purple-50 rounded-xl">
+                        <HelpCircle className="w-6 h-6 text-purple-600" />
                       </div>
                       <div className="flex-1 min-w-0">
                         {/* Основная информация - всегда видна */}
@@ -185,8 +180,8 @@ export default function QuestionsPage() {
                             >
                               {question.isModerated ? "Одобрено" : "На модерации"}
                             </span>
-                            <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                              {question.category || question.targetType}
+                            <span className="bg-purple-50 text-purple-600 px-3 py-1 rounded-full text-sm font-medium">
+                              {question.category || "Общий вопрос"}
                             </span>
                           </div>
                         </div>
@@ -218,7 +213,7 @@ export default function QuestionsPage() {
                             <div className="flex items-center gap-2 mb-2">
                               <MessageSquare className="w-4 h-4 text-gray-600" />
                               <span className="text-sm font-medium text-gray-700">
-                                Текст вопроса
+                                Оригинальный текст вопроса
                               </span>
                             </div>
                             <p className="text-sm text-gray-600 leading-relaxed">
@@ -234,10 +229,10 @@ export default function QuestionsPage() {
                                   <div className="flex items-center gap-2">
                                     <Globe className="w-4 h-4 text-blue-600" />
                                     <span className="text-sm font-medium text-blue-700">
-                                      Перевод UK
+                                      Украинский перевод
                                     </span>
                                   </div>
-                                  <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                                  <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
                                     {question.textUk}
                                   </p>
                                 </div>
@@ -247,10 +242,10 @@ export default function QuestionsPage() {
                                   <div className="flex items-center gap-2">
                                     <Globe className="w-4 h-4 text-red-600" />
                                     <span className="text-sm font-medium text-red-700">
-                                      Перевод RU
+                                      Русский перевод
                                     </span>
                                   </div>
-                                  <p className="text-sm text-gray-600 bg-red-50 p-3 rounded-lg">
+                                  <p className="text-sm text-gray-600 bg-red-50 p-3 rounded-lg border-l-4 border-red-400">
                                     {question.textRu}
                                   </p>
                                 </div>
@@ -258,109 +253,37 @@ export default function QuestionsPage() {
                             </div>
                           )}
 
-                          {/* Информация о связанном МФО */}
-                          {question.mfo && (
-                            <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
-                              <div className="flex items-center gap-2 mb-3">
-                                <Building2 className="w-4 h-4 text-green-600" />
-                                <span className="text-sm font-medium text-green-700">
-                                  Связанное МФО
+                          {/* Информация о категории */}
+                          {question.category && (
+                            <div className="p-4 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Tag className="w-4 h-4 text-purple-600" />
+                                <span className="text-sm font-medium text-purple-700">
+                                  Категория вопроса
                                 </span>
                               </div>
-                              <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
-                                <img
-                                  src={question.mfo.logo}
-                                  alt={question.mfo.name}
-                                  className="w-12 h-12 rounded object-cover"
-                                />
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <p className="text-base font-semibold text-gray-800">
-                                      {question.mfo.name}
-                                    </p>
-                                    {question.mfo.isActive ? (
-                                      <CheckCircle className="w-4 h-4 text-green-500" />
-                                    ) : (
-                                      <AlertCircle className="w-4 h-4 text-red-500" />
-                                    )}
-                                  </div>
-                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500 mb-2">
-                                    <span className="flex items-center gap-1">
-                                      <Star className="w-3 h-3" />
-                                      {question.mfo.rating} ({question.mfo.reviews} отзывов)
-                                    </span>
-                                    <span>
-                                      {question.mfo.minAmount}-{question.mfo.maxAmount}₴
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                      <Clock className="w-3 h-3" />
-                                      {question.mfo.decisionTime}
-                                    </span>
-                                    <span>
-                                      Одобрение: {question.mfo.approvalRate}%
-                                    </span>
-                                  </div>
-                                  <div className="flex flex-wrap gap-1">
-                                    {question.mfo.isFirstLoanZero && (
-                                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                                        0% первый займ
-                                      </span>
-                                    )}
-                                    {question.mfo.isInstantApproval && (
-                                      <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                                        Мгновенное одобрение
-                                      </span>
-                                    )}
-                                    {question.mfo.is24Support && (
-                                      <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
-                                        24/7 поддержка
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <p className="text-xs text-gray-500 mb-1">Лицензия</p>
-                                  <p className="text-sm font-medium text-gray-700">
-                                    {question.mfo.licenseNumber}
-                                  </p>
-                                  {question.mfo.website && (
-                                    <a
-                                      href={question.mfo.website}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-xs mt-1"
-                                    >
-                                      <ExternalLink className="w-3 h-3" />
-                                      Сайт
-                                    </a>
-                                  )}
-                                </div>
+                              <p className="text-sm text-purple-800 font-medium">
+                                {question.category}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Ответы, если есть */}
+                          {question.answers && question.answers.length > 0 && (
+                            <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
+                              <div className="flex items-center gap-2 mb-3">
+                                <MessageSquare className="w-4 h-4 text-green-600" />
+                                <span className="text-sm font-medium text-green-700">
+                                  Ответы ({question.answers.length})
+                                </span>
                               </div>
-                              
-                              {/* Дополнительная информация о МФО */}
-                              <div className="mt-3 grid md:grid-cols-2 gap-3 text-xs text-gray-600">
-                                <div>
-                                  <span className="font-medium">Возраст:</span> {question.mfo.ageFrom}-{question.mfo.ageTo} лет
-                                </div>
-                                <div>
-                                  <span className="font-medium">Документы:</span> {question.mfo.documents}
-                                </div>
-                                <div>
-                                  <span className="font-medium">Гражданство:</span> {question.mfo.citizenship}
-                                </div>
-                                {question.mfo.phone && (
-                                  <div className="flex items-center gap-1">
-                                    <Phone className="w-3 h-3" />
-                                    <span>{question.mfo.phone}</span>
+                              <div className="space-y-2">
+                                {question.answers.map((answer, index) => (
+                                  <div key={index} className="p-3 bg-white rounded-lg border">
+                                    <p className="text-sm text-gray-700">{answer}</p>
                                   </div>
-                                )}
+                                ))}
                               </div>
-                              
-                              {question.mfo.description && (
-                                <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                                  <span className="font-medium">Описание:</span> {question.mfo.description}
-                                </div>
-                              )}
                             </div>
                           )}
 
@@ -369,17 +292,29 @@ export default function QuestionsPage() {
                             <div className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               <span>
-                                Создан: {new Date(question.createdAt).toLocaleDateString("ru-RU")}
+                                Создан: {new Date(question.createdAt).toLocaleDateString("ru-RU", {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
                               </span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Tag className="w-3 h-3" />
-                              <span>ID: {question.targetId}</span>
+                              <span>ID: {question.id}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Tag className="w-3 h-3" />
                               <span>Тип: {question.targetType}</span>
                             </div>
+                            {question.targetId && (
+                              <div className="flex items-center gap-1">
+                                <Tag className="w-3 h-3" />
+                                <span>Target ID: {question.targetId}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
