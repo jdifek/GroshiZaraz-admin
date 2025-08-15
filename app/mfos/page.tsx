@@ -3,14 +3,9 @@
 import { useEffect, useState } from "react";
 import { 
   Search, 
-  Edit2, 
   Trash2, 
   Star, 
-  ChevronDown, 
-  ChevronUp,
-  Building2,
   Clock,
-  Users,
   CreditCard,
   CheckCircle,
   XCircle,
@@ -24,8 +19,6 @@ import {
   DollarSign,
   Award,
   UserCheck,
-  Lock,
-  Repeat
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { Mfo } from "../services/mfos/mfoTypes";
@@ -33,6 +26,8 @@ import MfoService from "../services/mfos/mfosService";
 import MfoModal from "../components/MfoModal";
 import Image from "next/image";
 import { BlueButton } from "../ui/Buttons/BlueButton";
+import { ExpandCollapseButton } from "../ui/Buttons/ExpandCollapseButton";
+import { EditButton } from "../ui/Buttons/EditButton";
 
 export default function MfosPage() {
   const [mfos, setMfos] = useState<Mfo[]>([]);
@@ -399,25 +394,15 @@ export default function MfosPage() {
                     {/* Кнопки управления */}
                     <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                       {/* Кнопка разворачивания/сворачивания */}
-                      <button
-                        onClick={() => toggleCardExpansion(mfo.id)}
-                        className="w-10 h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center transition-colors"
-                        title={isExpanded ? "Свернуть" : "Развернуть"}
-                      >
-                        {isExpanded ? (
-                          <ChevronUp className="w-5 h-5" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5" />
-                        )}
-                      </button>
+                      <ExpandCollapseButton
+  isExpanded={isExpanded}
+  onToggle={() => toggleCardExpansion(mfo.id)}
+/>
 
-                      <button
-                        onClick={() => openModal("edit", mfo)}
-                        className="w-10 h-10 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center transition-colors"
-                        title="Редактировать"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
+<EditButton
+                        item={mfo}
+                        handleClick={(mfo) => openModal("edit", mfo)}
+                      />
                       <button
                         onClick={() => deleteMfo(mfo.id)}
                         className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"

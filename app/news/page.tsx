@@ -3,20 +3,16 @@
 import { useEffect, useState } from "react";
 import {
   Search,
-  Edit2,
   Trash2,
   Eye,
   Users,
   Calendar,
-  ChevronDown,
-  ChevronUp,
   FileText,
   Globe,
   Clock,
   User,
   Tag,
   BookOpen,
-  Star,
   Award,
   Mail,
   MessageCircle,
@@ -35,6 +31,8 @@ import CategoryService from "../services/categories/categoriesService";
 import { Category } from "../services/categories/categoriesTypes";
 import { toast } from "react-toastify";
 import { GreenButton } from "../ui/Buttons/GreenButton";
+import { ExpandCollapseButton } from "../ui/Buttons/ExpandCollapseButton";
+import { EditButton } from "../ui/Buttons/EditButton";
 
 export default function NewsPage() {
   const [news, setNews] = useState<News[]>([]);
@@ -468,17 +466,10 @@ export default function NewsPage() {
                     {/* Кнопки управления */}
                     <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                       {/* Кнопка разворачивания/сворачивания */}
-                      <button
-                        onClick={() => toggleCardExpansion(article.id)}
-                        className="w-10 h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center transition-colors"
-                        title={isExpanded ? "Свернуть" : "Развернуть"}
-                      >
-                        {isExpanded ? (
-                          <ChevronUp className="w-5 h-5" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5" />
-                        )}
-                      </button>
+                      <ExpandCollapseButton
+  isExpanded={isExpanded}
+  onToggle={() => toggleCardExpansion(article.id)}
+/>
 
                       <button
                         onClick={() => openModal("view", article)}
@@ -487,13 +478,11 @@ export default function NewsPage() {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => openModal("edit", article)}
-                        className="w-10 h-10 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center transition-colors"
-                        title="Редактировать"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
+                         
+                      <EditButton
+                        item={article}
+                        handleClick={(article) => openModal("edit", article)}
+                      />
                       <button
                         onClick={() => handleDelete(article.id)}
                         className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"

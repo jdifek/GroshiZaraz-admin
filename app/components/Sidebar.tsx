@@ -1,128 +1,239 @@
 "use client";
-
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
-  TrendingUp,
   Building2,
   FileText,
   MessageSquare,
+  Users,
+  Settings,
+  BarChart3,
+  User,
+  LogOut,
   ChevronDown,
   ChevronRight,
+  Shield,
   SatelliteDish,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
-const sidebarItems = [
-  { id: "dashboard", name: "Дашборд", icon: TrendingUp, path: "/" },
-  { id: "mfos", name: "МФО(укр доб)", icon: Building2, path: "/mfos" },
+const menuItems = [
   {
-    id: "contentGroup",
-    name: "Контент",
+    href: "/",
+    icon: BarChart3,
+    label: "Панель управления",
+  },
+  {
+    href: "/mfos",
+    icon: Building2,
+    label: "МФО",
+  },
+  {
     icon: FileText,
+    label: "Контент",
     children: [
-      { id: "news", name: "Новости", path: "/news" },
-      { id: "authors", name: "Авторы", path: "/authors" },
-      { id: "categories", name: "Категории новостей", path: "/categories" },
+      { href: "/news", label: "Новости" },
+      { href: "/authors", label: "Авторы" },
+      { href: "/categories", label: "Категории новостей" },
     ],
   },
   {
-    id: "SatelliteMfo",
-    name: "Сателлиты",
     icon: SatelliteDish,
+    label: "Сателлиты",
     children: [
-      { id: "questions", name: "Сателлиты МФО", path: "/satellite-mfo" },
-      { id: "questions-mfo", name: "Ключи Сателлиты МФО", path: "/satellite-keys-mfo" },
+      { href: "/satellite-mfo", label: "Сателлиты МФО" },
+      { href: "/satellite-keys-mfo", label: "Ключи Сателлиты МФО" },
     ],
   },
   {
-    id: "reviewsGroup",
-    name: "Отзывы",
     icon: MessageSquare,
+    label: "Отзывы",
     children: [
-      { id: "reviews", name: "Отзывы сайта", path: "/reviews" },
-      { id: "reviews-mfo", name: "Отзывы МФО", path: "/reviews-mfo" },
+      { href: "/reviews", label: "Отзывы сайта" },
+      { href: "/reviews-mfo", label: "Отзывы МФО" },
     ],
   },
   {
-    id: "questionsGroup",
-    name: "Вопросы",
     icon: MessageSquare,
+    label: "Вопросы",
     children: [
-      { id: "questions", name: "Вопросы общие", path: "/questions" },
-      { id: "questions-mfo", name: "Вопросы сайта", path: "/questions-mfo" },
+      { href: "/questions", label: "Вопросы общие" },
+      { href: "/questions-mfo", label: "Вопросы сайта" },
     ],
   },
- 
- 
   {
-    id: "answersGroup",
-    name: "Ответы",
     icon: MessageSquare,
+    label: "Ответы",
     children: [
-      { id: "questionAnswers", name: "Ответы", path: "/questionAnswers" },
-      { id: "questionAnswers-mfo", name: "Ответы МФО", path: "/questionAnswers-mfo" },
+      { href: "/questionAnswers", label: "Ответы" },
+      { href: "/questionAnswers-mfo", label: "Ответы МФО" },
     ],
   },
-
+  {
+    href: "/settings",
+    icon: Settings,
+    label: "Настройки",
+  },
 ];
 
 export default function Sidebar() {
-  const router = useRouter();
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
-  const toggleGroup = (id: string) => {
-    setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }));
+  const handleLogout = () => {
+    logout();
+    toast.success("Вы успешно вышли из системы");
   };
 
-  const handleNavigation = (path: string) => {
-    router.push(path);
+  const formatUserName = () => {
+    if (user?.firstName) {
+      return `${user.firstName} ${user.lastName || ""}`.trim();
+    }
+    return user?.email || "Пользователь";
+  };
+
+  const getRoleLabel = () => {
+    switch (user?.role) {
+      case "admin":
+        return "Администратор";
+      case "editor":
+        return "Редактор";
+      case "moderator":
+        return "Модератор";
+      default:
+        return "Пользователь";
+    }
+  };
+
+  const toggleGroup = (label: string) => {
+    setOpenGroups((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
   };
 
   return (
-    <div className="w-64 bg-white shadow-md border-r border-gray-200 h-screen scrollbar-none overflow-y-auto">
-       <div  className="flex items-center space-x-2 p-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-yellow-400 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-              GZ
-            </div>
-            <span className="text-xl font-bold tracking-tight text-[#1A4D8F] hover:text-[#00AEEF] transition-colors">
-              Groshi<span className="text-[#00AEEF]">Zaraz</span>
-            </span>
+    <div className="w-72 bg-white shadow-xl border-r border-gray-100 flex flex-col h-screen">
+      {/* Логотип */}
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-xl">
+            🏦
           </div>
-      <nav className="mt-4 space-y-1">
-        {sidebarItems.map((item) => {
-          const isActive = pathname === item.path;
+          <div>
+            <h1 className="text-xl font-bold text-gray-800">MFO Admin</h1>
+            <p className="text-xs text-gray-500">Панель управления</p>
+          </div>
+        </div>
+      </div>
 
-          if ("children" in item) {
-            const isOpen = openGroups[item.id] || false;
-            return (
-              <div key={item.id}>
-                <button
-                  onClick={() => toggleGroup(item.id)}
-                  className="cursor-pointer w-full flex items-center justify-between px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex cursor-pointer  items-center gap-3">
-                    <item.icon className="w-5 h-5" />
-                    {item.name}
+      {/* Профиль пользователя */}
+      {user && (
+        <div className="p-4 border-b border-gray-100">
+          <div className="relative">
+            <button
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                {formatUserName().charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 text-left min-w-0">
+                <p className="font-semibold text-gray-800 text-sm truncate">
+                  {formatUserName()}
+                </p>
+                <p className="text-xs text-gray-500 flex items-center gap-1">
+                  <Shield className="w-3 h-3" />
+                  {getRoleLabel()}
+                </p>
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 text-gray-400 transition-transform ${
+                  isUserMenuOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {isUserMenuOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-100 z-50">
+                <div className="py-2">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-xs text-gray-500">Email</p>
+                    <p className="text-sm font-medium text-gray-800 truncate">
+                      {user.email}
+                    </p>
                   </div>
-                  {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-xs text-gray-500">ID пользователя</p>
+                    <p className="text-sm font-medium text-gray-800">
+                      {user.id}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    Профиль
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Выйти
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Навигационное меню */}
+      <nav className="flex-1 p-4 space-y-2 scrollbar-none overflow-y-auto">
+        {menuItems.map((item) => {
+          const isActive = pathname === item.href;
+          const Icon = item.icon;
+
+          if (item.children) {
+            const isOpen = openGroups[item.label] || false;
+            return (
+              <div key={item.label}>
+                <button
+                  onClick={() => toggleGroup(item.label)}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100"
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-5 h-5" />
+                    <span className="font-medium">{item.label}</span>
+                  </div>
+                  {isOpen ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4" />
+                  )}
                 </button>
                 {isOpen && (
                   <div className="ml-10 space-y-1">
-                    {item.children?.map((sub) => {
-                      const isSubActive = pathname === sub.path;
+                    {item.children.map((sub) => {
+                      const isSubActive = pathname === sub.href;
                       return (
-                        <button
-                          key={sub.id}
-                          onClick={() => handleNavigation(sub.path)}
-                          className={`w-full cursor-pointer text-left text-sm px-4 py-2 rounded-md ${
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          className={`block px-3 py-2 rounded-md text-sm ${
                             isSubActive
-                              ? "bg-blue-50 text-blue-600"
+                              ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white"
                               : "text-gray-600 hover:bg-gray-100"
                           }`}
                         >
-                          {sub.name}
-                        </button>
+                          {sub.label}
+                        </Link>
                       );
                     })}
                   </div>
@@ -132,21 +243,25 @@ export default function Sidebar() {
           }
 
           return (
-            <button
-              key={item.id}
-              onClick={() => handleNavigation(item.path)}
-              className={`cursor-pointer w-full flex items-center gap-3 px-6 py-3 text-sm font-medium ${
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 isActive
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-gray-600 hover:bg-gray-50"
-              } transition-colors`}
+                  ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-800"
+              }`}
             >
-              <item.icon className="w-5 h-5" />
-              {item.name}
-            </button>
+              <Icon
+                className={`w-5 h-5 ${isActive ? "text-white" : "text-gray-500"}`}
+              />
+              <span className="font-medium">{item.label}</span>
+            </Link>
           );
         })}
       </nav>
+
+     
     </div>
   );
 }

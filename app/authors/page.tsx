@@ -2,11 +2,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  Search, 
-  Trash2, 
-  FileText, 
-  Eye, 
+import {
+  Search,
+  Trash2,
+  FileText,
+  Eye,
   ChevronDown,
   ChevronUp,
   User,
@@ -22,7 +22,7 @@ import {
   Twitter,
   Tag,
   Edit2,
-  Link
+  Link,
 } from "lucide-react";
 import AuthorModal from "../components/AuthorModal";
 import { formatNumber } from "../utils/format";
@@ -30,6 +30,8 @@ import AuthorsService from "../services/authors/authorsService";
 import { Author } from "../services/authors/authorsTypes";
 import { toast } from "react-toastify";
 import { VioletButton } from "../ui/Buttons/VioletButton";
+import { ExpandCollapseButton } from "../ui/Buttons/ExpandCollapseButton";
+import { EditButton } from "../ui/Buttons/EditButton";
 
 export default function AuthorsPage() {
   const [authors, setAuthors] = useState<Author[]>([]);
@@ -82,12 +84,15 @@ export default function AuthorsPage() {
     setExpandedCardId(expandedCardId === authorId ? null : authorId);
   };
 
-  const filteredAuthors = authors.filter((author) =>
-    author.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    author.nameUk?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    author.position?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    author.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    author.expertise?.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredAuthors = authors.filter(
+    (author) =>
+      author.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      author.nameUk?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      author.position?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      author.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      author.expertise?.some((skill) =>
+        skill.toLowerCase().includes(searchTerm.toLowerCase())
+      )
   );
 
   return (
@@ -102,7 +107,10 @@ export default function AuthorsPage() {
             Добавление и редактирование авторов ({authors.length})
           </p>
         </div>
-        <VioletButton text="Добавить автора" onClick={() => openModal("create")} />
+        <VioletButton
+          text="Добавить автора"
+          onClick={() => openModal("create")}
+        />
       </div>
 
       {/* Поиск */}
@@ -150,7 +158,7 @@ export default function AuthorsPage() {
         ) : (
           filteredAuthors.map((author) => {
             const isExpanded = expandedCardId === author.id;
-            
+
             return (
               <div
                 key={author.id}
@@ -159,8 +167,10 @@ export default function AuthorsPage() {
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-start gap-4 flex-1">
-                      <div className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0"
-                           style={{backgroundColor: author.color || '#8b5cf6'}}>
+                      <div
+                        className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0"
+                        style={{ backgroundColor: author.color || "#8b5cf6" }}
+                      >
                         {author.avatar || author.name.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -173,20 +183,22 @@ export default function AuthorsPage() {
                             {author.nameUk && author.nameUk !== author.name && (
                               <div className="flex items-center gap-2 mb-2">
                                 <Globe className="w-4 h-4 text-blue-600" />
-                                <span className="text-sm text-blue-600">UK: {author.nameUk}</span>
+                                <span className="text-sm text-blue-600">
+                                  UK: {author.nameUk}
+                                </span>
                               </div>
                             )}
                             {author.position && (
-                              <p className="text-sm text-gray-600 font-medium mb-2">{author.position}</p>
+                              <p className="text-sm text-gray-600 font-medium mb-2">
+                                {author.position}
+                              </p>
                             )}
                           </div>
                         </div>
 
                         {/* Краткая информация - всегда видна */}
                         <div className="mb-4 text-sm text-gray-600 space-y-2">
-                          <div className="line-clamp-2">
-                            {author.bio}
-                          </div>
+                          <div className="line-clamp-2">{author.bio}</div>
                           <div className="flex items-center gap-4 flex-wrap">
                             <div className="flex items-center gap-1">
                               <FileText className="w-4 h-4 text-gray-400" />
@@ -194,19 +206,29 @@ export default function AuthorsPage() {
                             </div>
                             <div className="flex items-center gap-1">
                               <Eye className="w-4 h-4 text-gray-400" />
-                              <span>{formatNumber(author.totalViews || 0)} просмотров</span>
+                              <span>
+                                {formatNumber(author.totalViews || 0)}{" "}
+                                просмотров
+                              </span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Users className="w-4 h-4 text-gray-400" />
-                              <span>{formatNumber(author.followers || 0)} подписчиков</span>
+                              <span>
+                                {formatNumber(author.followers || 0)}{" "}
+                                подписчиков
+                              </span>
                             </div>
                           </div>
                         </div>
 
                         {/* Детальная информация - показывается при разворачивании */}
-                        <div className={`space-y-4 transition-all duration-300 overflow-hidden ${
-                          isExpanded ? 'max-h-none opacity-100' : 'max-h-0 opacity-0'
-                        }`}>
+                        <div
+                          className={`space-y-4 transition-all duration-300 overflow-hidden ${
+                            isExpanded
+                              ? "max-h-none opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
+                        >
                           {/* Полная биография */}
                           <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-400">
                             <div className="flex items-center gap-2 mb-2">
@@ -242,24 +264,39 @@ export default function AuthorsPage() {
                                   Карьера и опыт
                                 </span>
                               </div>
-                              
+
                               {author.position && (
                                 <div className="mb-3">
-                                  <div className="text-sm font-medium text-violet-800 mb-1">Должность:</div>
-                                  <div className="text-sm text-violet-700">{author.position}</div>
-                                  {author.positionUk && author.positionUk !== author.position && (
-                                    <div className="text-xs text-violet-600 mt-1">UK: {author.positionUk}</div>
-                                  )}
+                                  <div className="text-sm font-medium text-violet-800 mb-1">
+                                    Должность:
+                                  </div>
+                                  <div className="text-sm text-violet-700">
+                                    {author.position}
+                                  </div>
+                                  {author.positionUk &&
+                                    author.positionUk !== author.position && (
+                                      <div className="text-xs text-violet-600 mt-1">
+                                        UK: {author.positionUk}
+                                      </div>
+                                    )}
                                 </div>
                               )}
-                              
+
                               {author.experience && (
                                 <div>
-                                  <div className="text-sm font-medium text-violet-800 mb-1">Опыт работы:</div>
-                                  <div className="text-sm text-violet-700">{author.experience}</div>
-                                  {author.experienceUk && author.experienceUk !== author.experience && (
-                                    <div className="text-xs text-violet-600 mt-1">UK: {author.experienceUk}</div>
-                                  )}
+                                  <div className="text-sm font-medium text-violet-800 mb-1">
+                                    Опыт работы:
+                                  </div>
+                                  <div className="text-sm text-violet-700">
+                                    {author.experience}
+                                  </div>
+                                  {author.experienceUk &&
+                                    author.experienceUk !==
+                                      author.experience && (
+                                      <div className="text-xs text-violet-600 mt-1">
+                                        UK: {author.experienceUk}
+                                      </div>
+                                    )}
                                 </div>
                               )}
                             </div>
@@ -276,60 +313,85 @@ export default function AuthorsPage() {
                               </div>
                               <div className="flex flex-wrap gap-2 mb-3">
                                 {author.expertise.map((skill, index) => (
-                                  <span key={index} className="px-3 py-1 bg-white text-blue-700 text-sm rounded-full border border-blue-200">
+                                  <span
+                                    key={index}
+                                    className="px-3 py-1 bg-white text-blue-700 text-sm rounded-full border border-blue-200"
+                                  >
                                     {skill}
                                   </span>
                                 ))}
                               </div>
-                              
-                              {author.expertiseUk && author.expertiseUk.length > 0 && (
-                                <div className="mt-3 pt-3 border-t border-blue-200">
-                                  <div className="text-sm font-medium text-blue-800 mb-2">Экспертиза UK:</div>
-                                  <div className="flex flex-wrap gap-2">
-                                    {author.expertiseUk.map((skill, index) => (
-                                      <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
-                                        {skill}
-                                      </span>
-                                    ))}
+
+                              {author.expertiseUk &&
+                                author.expertiseUk.length > 0 && (
+                                  <div className="mt-3 pt-3 border-t border-blue-200">
+                                    <div className="text-sm font-medium text-blue-800 mb-2">
+                                      Экспертиза UK:
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {author.expertiseUk.map(
+                                        (skill, index) => (
+                                          <span
+                                            key={index}
+                                            className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full"
+                                          >
+                                            {skill}
+                                          </span>
+                                        )
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              )}
+                                )}
                             </div>
                           )}
 
                           {/* Достижения */}
-                          {author.achievements && author.achievements.length > 0 && (
-                            <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
-                              <div className="flex items-center gap-2 mb-3">
-                                <Award className="w-4 h-4 text-green-600" />
-                                <span className="text-sm font-medium text-green-700">
-                                  Достижения
-                                </span>
-                              </div>
-                              <div className="space-y-2 mb-3">
-                                {author.achievements.map((achievement, index) => (
-                                  <div key={index} className="flex items-center gap-2 text-sm text-green-700">
-                                    <Star className="w-3 h-3 text-yellow-500 flex-shrink-0" />
-                                    <span>{achievement}</span>
-                                  </div>
-                                ))}
-                              </div>
-                              
-                              {author.achievementsUk && author.achievementsUk.length > 0 && (
-                                <div className="mt-3 pt-3 border-t border-green-200">
-                                  <div className="text-sm font-medium text-green-800 mb-2">Достижения UK:</div>
-                                  <div className="space-y-2">
-                                    {author.achievementsUk.map((achievement, index) => (
-                                      <div key={index} className="flex items-center gap-2 text-sm text-green-700">
+                          {author.achievements &&
+                            author.achievements.length > 0 && (
+                              <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Award className="w-4 h-4 text-green-600" />
+                                  <span className="text-sm font-medium text-green-700">
+                                    Достижения
+                                  </span>
+                                </div>
+                                <div className="space-y-2 mb-3">
+                                  {author.achievements.map(
+                                    (achievement, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-center gap-2 text-sm text-green-700"
+                                      >
                                         <Star className="w-3 h-3 text-yellow-500 flex-shrink-0" />
                                         <span>{achievement}</span>
                                       </div>
-                                    ))}
-                                  </div>
+                                    )
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                          )}
+
+                                {author.achievementsUk &&
+                                  author.achievementsUk.length > 0 && (
+                                    <div className="mt-3 pt-3 border-t border-green-200">
+                                      <div className="text-sm font-medium text-green-800 mb-2">
+                                        Достижения UK:
+                                      </div>
+                                      <div className="space-y-2">
+                                        {author.achievementsUk.map(
+                                          (achievement, index) => (
+                                            <div
+                                              key={index}
+                                              className="flex items-center gap-2 text-sm text-green-700"
+                                            >
+                                              <Star className="w-3 h-3 text-yellow-500 flex-shrink-0" />
+                                              <span>{achievement}</span>
+                                            </div>
+                                          )
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                              </div>
+                            )}
 
                           {/* Статистика */}
                           <div className="p-4 bg-orange-50 rounded-lg border-l-4 border-orange-400">
@@ -344,25 +406,34 @@ export default function AuthorsPage() {
                                 <div className="text-lg font-bold text-gray-800">
                                   {formatNumber(author.totalViews || 0)}
                                 </div>
-                                <div className="text-xs text-gray-500">Всего просмотров</div>
+                                <div className="text-xs text-gray-500">
+                                  Всего просмотров
+                                </div>
                               </div>
                               <div className="text-center p-3 bg-white rounded-lg">
                                 <div className="text-lg font-bold text-gray-800">
                                   {author.totalPosts || 0}
                                 </div>
-                                <div className="text-xs text-gray-500">Всего статей</div>
+                                <div className="text-xs text-gray-500">
+                                  Всего статей
+                                </div>
                               </div>
                               <div className="text-center p-3 bg-white rounded-lg">
                                 <div className="text-lg font-bold text-gray-800">
                                   {formatNumber(author.followers || 0)}
                                 </div>
-                                <div className="text-xs text-gray-500">Подписчиков</div>
+                                <div className="text-xs text-gray-500">
+                                  Подписчиков
+                                </div>
                               </div>
                             </div>
                           </div>
 
                           {/* Контактная информация */}
-                          {(author.email || author.telegram || author.linkedin || author.twitter) && (
+                          {(author.email ||
+                            author.telegram ||
+                            author.linkedin ||
+                            author.twitter) && (
                             <div className="p-4 bg-indigo-50 rounded-lg border-l-4 border-indigo-400">
                               <div className="flex items-center gap-2 mb-3">
                                 <Mail className="w-4 h-4 text-indigo-600" />
@@ -372,34 +443,53 @@ export default function AuthorsPage() {
                               </div>
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 {author.email && (
-                                  <a href={`mailto:${author.email}`} 
-                                     className="flex items-center gap-2 p-2 bg-white rounded-lg text-indigo-700 hover:text-indigo-900 transition-colors">
+                                  <a
+                                    href={`mailto:${author.email}`}
+                                    className="flex items-center gap-2 p-2 bg-white rounded-lg text-indigo-700 hover:text-indigo-900 transition-colors"
+                                  >
                                     <Mail className="w-4 h-4" />
-                                    <span className="text-sm truncate">Email</span>
+                                    <span className="text-sm truncate">
+                                      Email
+                                    </span>
                                   </a>
                                 )}
                                 {author.telegram && (
-                                  <a href={`https://t.me/${author.telegram}`} 
-                                     target="_blank" rel="noopener noreferrer"
-                                     className="flex items-center gap-2 p-2 bg-white rounded-lg text-indigo-700 hover:text-indigo-900 transition-colors">
+                                  <a
+                                    href={`https://t.me/${author.telegram}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 p-2 bg-white rounded-lg text-indigo-700 hover:text-indigo-900 transition-colors"
+                                  >
                                     <MessageCircle className="w-4 h-4" />
-                                    <span className="text-sm truncate">Telegram</span>
+                                    <span className="text-sm truncate">
+                                      Telegram
+                                    </span>
                                   </a>
                                 )}
                                 {author.linkedin && (
-                                  <a href={`https://linkedin.com/in/${author.linkedin}`} 
-                                     target="_blank" rel="noopener noreferrer"
-                                     className="flex items-center gap-2 p-2 bg-white rounded-lg text-indigo-700 hover:text-indigo-900 transition-colors">
+                                  <a
+                                    href={`https://linkedin.com/in/${author.linkedin}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 p-2 bg-white rounded-lg text-indigo-700 hover:text-indigo-900 transition-colors"
+                                  >
                                     <Linkedin className="w-4 h-4" />
-                                    <span className="text-sm truncate">LinkedIn</span>
+                                    <span className="text-sm truncate">
+                                      LinkedIn
+                                    </span>
                                   </a>
                                 )}
                                 {author.twitter && (
-                                  <a href={`https://twitter.com/${author.twitter}`} 
-                                     target="_blank" rel="noopener noreferrer"
-                                     className="flex items-center gap-2 p-2 bg-white rounded-lg text-indigo-700 hover:text-indigo-900 transition-colors">
+                                  <a
+                                    href={`https://twitter.com/${author.twitter}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 p-2 bg-white rounded-lg text-indigo-700 hover:text-indigo-900 transition-colors"
+                                  >
                                     <Twitter className="w-4 h-4" />
-                                    <span className="text-sm truncate">Twitter</span>
+                                    <span className="text-sm truncate">
+                                      Twitter
+                                    </span>
                                   </a>
                                 )}
                               </div>
@@ -416,18 +506,25 @@ export default function AuthorsPage() {
                             </div>
                             <div className="grid md:grid-cols-2 gap-3 text-xs text-gray-600">
                               <div>
-                                <span className="font-medium">ID:</span> {author.id}
+                                <span className="font-medium">ID:</span>{" "}
+                                {author.id}
                               </div>
                               {author.slug && (
                                 <div>
-                                  <span className="font-medium">Slug:</span> /{author.slug}
+                                  <span className="font-medium">Slug:</span> /
+                                  {author.slug}
                                 </div>
                               )}
                               {author.color && (
                                 <div className="flex items-center gap-2">
-                                  <span className="font-medium">Цвет:</span> 
-                                  <div className="w-4 h-4 rounded border" style={{backgroundColor: author.color}}></div>
-                                  <span className="font-mono text-xs">{author.color}</span>
+                                  <span className="font-medium">Цвет:</span>
+                                  <div
+                                    className="w-4 h-4 rounded border"
+                                    style={{ backgroundColor: author.color }}
+                                  ></div>
+                                  <span className="font-mono text-xs">
+                                    {author.color}
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -439,25 +536,15 @@ export default function AuthorsPage() {
                     {/* Кнопки управления */}
                     <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                       {/* Кнопка разворачивания/сворачивания */}
-                      <button
-                        onClick={() => toggleCardExpansion(author.id)}
-                        className="w-10 h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center transition-colors"
-                        title={isExpanded ? "Свернуть" : "Развернуть"}
-                      >
-                        {isExpanded ? (
-                          <ChevronUp className="w-5 h-5" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5" />
-                        )}
-                      </button>
-                      
-                      <button
-                        onClick={() => openModal("edit", author)}
-                        className="w-10 h-10 bg-violet-50 hover:bg-violet-100 text-violet-600 rounded-xl flex items-center justify-center transition-colors"
-                        title="Редактировать"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
+                      <ExpandCollapseButton
+                        isExpanded={isExpanded}
+                        onToggle={() => toggleCardExpansion(author.id)}
+                      />
+
+                      <EditButton
+                        item={author}
+                        handleClick={(author) => openModal("edit", author)}
+                      />
                       <button
                         onClick={() => handleDelete(author.id.toString())}
                         className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"

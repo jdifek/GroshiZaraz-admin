@@ -6,13 +6,16 @@ import CategoryModal from "../components/CategoryModal";
 import { Category } from "../services/categories/categoriesTypes";
 import CategoryService from "../services/categories/categoriesService";
 import { OrangeButton } from "../ui/Buttons/OrangeButton";
+import { EditButton } from "../ui/Buttons/EditButton";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -44,21 +47,33 @@ export default function CategoriesPage() {
     }
   };
 
-  const openModal = (mode: "create" | "edit", category: Category | null = null) => {
+  const openModal = (
+    mode: "create" | "edit",
+    category: Category | null = null
+  ) => {
     setModalMode(mode);
     setSelectedCategory(category);
     setIsModalOpen(true);
   };
 
-  const handleSave = async (data: { name: string; icon?: string; nameUk: string }) => {
+  const handleSave = async (data: {
+    name: string;
+    icon?: string;
+    nameUk: string;
+  }) => {
     try {
       if (modalMode === "create") {
         const response = await CategoryService.createCategory(data);
         setCategories([...categories, response]);
         toast.success("Категория создана");
       } else if (modalMode === "edit" && selectedCategory) {
-        const response = await CategoryService.updateCategory(selectedCategory.id, data);
-        setCategories(categories.map((cat) => (cat.id === response.id ? response : cat)));
+        const response = await CategoryService.updateCategory(
+          selectedCategory.id,
+          data
+        );
+        setCategories(
+          categories.map((cat) => (cat.id === response.id ? response : cat))
+        );
         toast.success("Категория обновлена");
       }
       setIsModalOpen(false);
@@ -83,7 +98,6 @@ export default function CategoriesPage() {
           <p className="text-gray-600">Управление категориями для статей</p>
         </div>
         <OrangeButton onClick={() => openModal("create")} />
-
       </div>
 
       {/* Search */}
@@ -104,7 +118,10 @@ export default function CategoriesPage() {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
           Array.from({ length: 6 }).map((_, idx) => (
-            <div key={idx} className="animate-pulse bg-white rounded-2xl shadow-md border border-gray-100 p-6 space-y-4">
+            <div
+              key={idx}
+              className="animate-pulse bg-white rounded-2xl shadow-md border border-gray-100 p-6 space-y-4"
+            >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-gray-200 rounded-xl" />
                 <div className="flex-1 space-y-2">
@@ -137,18 +154,18 @@ export default function CategoriesPage() {
                   {category.icon || "📂"}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-800">{category.name}</h3>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    {category.name}
+                  </h3>
                   <p className="text-sm text-gray-500">ID: {category.id}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => openModal("edit", category)}
-                  className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 px-4 rounded-xl font-medium transition-colors"
-                >
-                  Редактировать
-                </button>
+                <EditButton
+                  item={category}
+                  handleClick={(category) => openModal("edit", category)}
+                />
                 <button
                   onClick={() => handleDelete(category.id)}
                   className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"

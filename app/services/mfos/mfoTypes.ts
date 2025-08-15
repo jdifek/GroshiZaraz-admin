@@ -1,6 +1,7 @@
 export interface Mfo {
   id: number;
   name: string;
+  slug: string;
   rating: number;
   reviews: number;
   logo: string;

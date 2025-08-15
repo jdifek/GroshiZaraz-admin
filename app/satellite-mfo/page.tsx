@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react";
 import {
   Search,
-  Edit2,
   Trash2,
   Satellite,
   Globe,
@@ -15,22 +14,16 @@ import {
   Building2,
   Star,
   Users,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import MfoSatelliteService from "../services/MfoSatellite/MfoSatelliteService";
 import { BlueButton } from "../ui/Buttons/BlueButton";
 import { MfoSatellite } from "../services/MfoSatellite/mfoSatelliteTypes";
+import { ExpandCollapseButton } from "../ui/Buttons/ExpandCollapseButton";
+import { EditButton } from "../ui/Buttons/EditButton";
 
 // Типы данных на основе вашего JSON
 
-
-
-const SatelliteModal = ({
-  isOpen,
-  onClose,
-  mode,
-}: any) => {
+const SatelliteModal = ({ isOpen, onClose, mode }: any) => {
   if (!isOpen) return null;
 
   return (
@@ -128,7 +121,10 @@ export default function SatellitesPage() {
             Список всех сателлитов ({satellites.length})
           </p>
         </div>
-        <BlueButton text="Добавить МФО Сателлита" onClick={() => openModal("create")} />
+        <BlueButton
+          text="Добавить МФО Сателлита"
+          onClick={() => openModal("create")}
+        />
       </div>
 
       {/* Поиск */}
@@ -171,7 +167,7 @@ export default function SatellitesPage() {
         ) : (
           filteredSatellites.map((satellite) => {
             const isExpanded = expandedCardId === satellite.id;
-            
+
             return (
               <div
                 key={satellite.id}
@@ -199,18 +195,29 @@ export default function SatellitesPage() {
                         {/* Краткая информация - всегда видна */}
                         <div className="mb-4 text-sm text-gray-600 space-y-1">
                           <div>
-                            <span className="font-medium text-gray-700">Slug:</span> {satellite.slugUk}
-                            {satellite.slugUk !== satellite.slugRu && ` / ${satellite.slugRu}`}
+                            <span className="font-medium text-gray-700">
+                              Slug:
+                            </span>{" "}
+                            {satellite.slugUk}
+                            {satellite.slugUk !== satellite.slugRu &&
+                              ` / ${satellite.slugRu}`}
                           </div>
                           <div>
-                            <span className="font-medium text-gray-700">МФО:</span> {satellite.mfoLinks?.length || 0} связанных
+                            <span className="font-medium text-gray-700">
+                              МФО:
+                            </span>{" "}
+                            {satellite.mfoLinks?.length || 0} связанных
                           </div>
                         </div>
 
                         {/* Детальная информация - показывается при разворачивании */}
-                        <div className={`space-y-4 transition-all duration-300 overflow-hidden ${
-                          isExpanded ? 'max-h-none opacity-100' : 'max-h-0 opacity-0'
-                        }`}>
+                        <div
+                          className={`space-y-4 transition-all duration-300 overflow-hidden ${
+                            isExpanded
+                              ? "max-h-none opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
+                        >
                           {/* Связь с ключом */}
                           {satellite.key && (
                             <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
@@ -336,7 +343,8 @@ export default function SatellitesPage() {
                                     {satellite.metaDescUk}
                                   </p>
                                 </div>
-                                {satellite.metaDescUk !== satellite.metaDescRu && (
+                                {satellite.metaDescUk !==
+                                  satellite.metaDescRu && (
                                   <div>
                                     <span className="text-xs font-medium text-red-600 block mb-1">
                                       RU:
@@ -351,67 +359,69 @@ export default function SatellitesPage() {
                           </div>
 
                           {/* МФО ссылки */}
-                          {satellite.mfoLinks && satellite.mfoLinks.length > 0 && (
-                            <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
-                              <div className="flex items-center gap-2 mb-3">
-                                <Building2 className="w-4 h-4 text-green-600" />
-                                <span className="text-sm font-medium text-green-700">
-                                  Связанные МФО ({satellite.mfoLinks.length})
-                                </span>
-                              </div>
-                              <div className="grid gap-2">
-                                {(expandedSatelliteId === satellite.id
-                                  ? satellite.mfoLinks
-                                  : satellite.mfoLinks.slice(0, 3)
-                                ).map((link) => (
-                                  <div
-                                    key={link.id}
-                                    className="flex items-center gap-3 p-2 bg-white rounded-lg border"
-                                  >
-                                    <img
-                                      src={link.mfo.logo}
-                                      alt={link.mfo.name}
-                                      className="w-8 h-8 rounded object-cover"
-                                    />
-                                    <div className="flex-1">
-                                      <p className="text-sm font-medium text-gray-800">
-                                        {link.mfo.name}
-                                      </p>
-                                      <div className="flex items-center gap-3 text-xs text-gray-500">
-                                        <span className="flex items-center gap-1">
-                                          <Star className="w-3 h-3" />
-                                          {link.mfo.rating}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                          <Users className="w-3 h-3" />
-                                          {link.mfo.reviews} отзывов
-                                        </span>
-                                        <span>
-                                          {link.mfo.minAmount}-{link.mfo.maxAmount}₴
-                                        </span>
+                          {satellite.mfoLinks &&
+                            satellite.mfoLinks.length > 0 && (
+                              <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Building2 className="w-4 h-4 text-green-600" />
+                                  <span className="text-sm font-medium text-green-700">
+                                    Связанные МФО ({satellite.mfoLinks.length})
+                                  </span>
+                                </div>
+                                <div className="grid gap-2">
+                                  {(expandedSatelliteId === satellite.id
+                                    ? satellite.mfoLinks
+                                    : satellite.mfoLinks.slice(0, 3)
+                                  ).map((link) => (
+                                    <div
+                                      key={link.id}
+                                      className="flex items-center gap-3 p-2 bg-white rounded-lg border"
+                                    >
+                                      <img
+                                        src={link.mfo.logo}
+                                        alt={link.mfo.name}
+                                        className="w-8 h-8 rounded object-cover"
+                                      />
+                                      <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-800">
+                                          {link.mfo.name}
+                                        </p>
+                                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                                          <span className="flex items-center gap-1">
+                                            <Star className="w-3 h-3" />
+                                            {link.mfo.rating}
+                                          </span>
+                                          <span className="flex items-center gap-1">
+                                            <Users className="w-3 h-3" />
+                                            {link.mfo.reviews} отзывов
+                                          </span>
+                                          <span>
+                                            {link.mfo.minAmount}-
+                                            {link.mfo.maxAmount}₴
+                                          </span>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                ))}
+                                  ))}
+                                </div>
+                                {satellite.mfoLinks.length > 3 && (
+                                  <button
+                                    onClick={() =>
+                                      setExpandedSatelliteId(
+                                        expandedSatelliteId === satellite.id
+                                          ? null
+                                          : satellite.id
+                                      )
+                                    }
+                                    className="text-green-600 text-xs mt-1 cursor-pointer underline"
+                                  >
+                                    {expandedSatelliteId === satellite.id
+                                      ? "Свернуть"
+                                      : `Показать все (${satellite.mfoLinks.length})`}
+                                  </button>
+                                )}
                               </div>
-                              {satellite.mfoLinks.length > 3 && (
-                                <button
-                                  onClick={() =>
-                                    setExpandedSatelliteId(
-                                      expandedSatelliteId === satellite.id
-                                        ? null
-                                        : satellite.id
-                                    )
-                                  }
-                                  className="text-green-600 text-xs mt-1 cursor-pointer underline"
-                                >
-                                  {expandedSatelliteId === satellite.id
-                                    ? "Свернуть"
-                                    : `Показать все (${satellite.mfoLinks.length})`}
-                                </button>
-                              )}
-                            </div>
-                          )}
+                            )}
 
                           {/* Мета информация */}
                           <div className="flex items-center gap-4 text-xs text-gray-400 pt-2 border-t border-gray-100">
@@ -419,18 +429,18 @@ export default function SatellitesPage() {
                               <Calendar className="w-3 h-3" />
                               <span>
                                 Создан:{" "}
-                                {new Date(satellite.createdAt).toLocaleDateString(
-                                  "ru-RU"
-                                )}
+                                {new Date(
+                                  satellite.createdAt
+                                ).toLocaleDateString("ru-RU")}
                               </span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               <span>
                                 Обновлён:{" "}
-                                {new Date(satellite.updatedAt).toLocaleDateString(
-                                  "ru-RU"
-                                )}
+                                {new Date(
+                                  satellite.updatedAt
+                                ).toLocaleDateString("ru-RU")}
                               </span>
                             </div>
                           </div>
@@ -440,25 +450,17 @@ export default function SatellitesPage() {
 
                     <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                       {/* Кнопка разворачивания/сворачивания */}
-                      <button
-                        onClick={() => toggleCardExpansion(satellite.id)}
-                        className="w-10 h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center transition-colors"
-                        title={isExpanded ? "Свернуть" : "Развернуть"}
-                      >
-                        {isExpanded ? (
-                          <ChevronUp className="w-5 h-5" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5" />
-                        )}
-                      </button>
-                      
-                      <button
-                        onClick={() => openModal("edit", satellite)}
-                        className="w-10 h-10 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center transition-colors"
-                        title="Редактировать"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
+                      <ExpandCollapseButton
+                        isExpanded={isExpanded}
+                        onToggle={() => toggleCardExpansion(satellite.id)}
+                      />
+
+                      <EditButton
+                        item={satellite}
+                        handleClick={(satellite) =>
+                          openModal("edit", satellite)
+                        }
+                      />
                       <button
                         onClick={() => deleteSatellite(satellite.id)}
                         className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"

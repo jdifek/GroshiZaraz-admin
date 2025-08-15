@@ -2,19 +2,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Edit2, Trash2, Key, Satellite, Calendar, Globe, FileText, Tag } from "lucide-react";
+import {
+  Search,
+  Trash2,
+  Key,
+  Satellite,
+  Calendar,
+  Globe,
+  FileText,
+  Tag,
+} from "lucide-react";
 import MfoSatelliteKeyService from "../services/MfoSatelliteKey/MfoSatelliteKeyService";
 import { BlueButton } from "../ui/Buttons/BlueButton";
 import { MfoSatelliteKey } from "../services/MfoSatelliteKey/mfoSatelliteKeyTypes";
+import { EditButton } from "../ui/Buttons/EditButton";
 
 const SatelliteKeyModal = ({ isOpen, onClose, mode }: any) => {
   if (!isOpen) return null;
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-2xl max-w-md w-full mx-4">
         <h3 className="text-xl font-semibold mb-4">
-          {mode === 'create' ? 'Создать ключ' : 'Редактировать ключ'}
+          {mode === "create" ? "Создать ключ" : "Редактировать ключ"}
         </h3>
         <p className="text-gray-600 mb-4">Форма для работы с ключами...</p>
         <div className="flex gap-2">
@@ -56,7 +66,10 @@ export default function SatelliteKeysPage() {
     fetchKeys();
   }, []);
 
-  const openModal = (mode: "create" | "edit", key: MfoSatelliteKey | null = null) => {
+  const openModal = (
+    mode: "create" | "edit",
+    key: MfoSatelliteKey | null = null
+  ) => {
     setModalMode(mode);
     setSelectedKey(key);
     setIsModalOpen(true);
@@ -72,7 +85,8 @@ export default function SatelliteKeysPage() {
   };
 
   const filteredKeys = keys.filter((key) => {
-    const searchTarget = `${key.keyUk} ${key.keyRu} ${key.slugUk} ${key.slugRu}`.toLowerCase();
+    const searchTarget =
+      `${key.keyUk} ${key.keyRu} ${key.slugUk} ${key.slugRu}`.toLowerCase();
     return searchTarget.includes(searchTerm.toLowerCase());
   });
 
@@ -84,9 +98,14 @@ export default function SatelliteKeysPage() {
           <h1 className="text-3xl font-bold text-gray-800 mb-1">
             Управление ключами сателлита
           </h1>
-          <p className="text-gray-600">Список всех ключей сателлита ({keys.length})</p>
+          <p className="text-gray-600">
+            Список всех ключей сателлита ({keys.length})
+          </p>
         </div>
-        <BlueButton text="Добавить МФО-ключ Сателлита" onClick={() => openModal("create")} />
+        <BlueButton
+          text="Добавить МФО-ключ Сателлита"
+          onClick={() => openModal("create")}
+        />
       </div>
 
       {/* Поиск */}
@@ -122,7 +141,9 @@ export default function SatelliteKeysPage() {
           </div>
         ) : filteredKeys.length === 0 ? (
           <div className="text-center text-gray-500 text-sm bg-gray-50 border border-gray-100 rounded-xl p-4">
-            {searchTerm ? "Ключи не найдены по вашему запросу." : "Ключи не найдены."}
+            {searchTerm
+              ? "Ключи не найдены по вашему запросу."
+              : "Ключи не найдены."}
           </div>
         ) : (
           filteredKeys.map((key) => (
@@ -147,22 +168,30 @@ export default function SatelliteKeysPage() {
                           </span>
                         )}
                       </div>
-                      
+
                       {/* Основная информация в сетке */}
                       <div className="grid md:grid-cols-2 gap-4 mb-4">
                         {/* Заголовки */}
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 mb-2">
                             <Tag className="w-4 h-4 text-purple-600" />
-                            <span className="text-sm font-medium text-gray-700">Заголовки</span>
+                            <span className="text-sm font-medium text-gray-700">
+                              Заголовки
+                            </span>
                           </div>
                           <div className="pl-6 space-y-1">
                             <p className="text-sm text-gray-600">
-                              <span className="font-medium text-blue-600">UK:</span> {key.titleUk}
+                              <span className="font-medium text-blue-600">
+                                UK:
+                              </span>{" "}
+                              {key.titleUk}
                             </p>
                             {key.titleUk !== key.titleRu && (
                               <p className="text-sm text-gray-600">
-                                <span className="font-medium text-red-600">RU:</span> {key.titleRu}
+                                <span className="font-medium text-red-600">
+                                  RU:
+                                </span>{" "}
+                                {key.titleRu}
                               </p>
                             )}
                           </div>
@@ -172,15 +201,23 @@ export default function SatelliteKeysPage() {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 mb-2">
                             <Globe className="w-4 h-4 text-green-600" />
-                            <span className="text-sm font-medium text-gray-700">Meta Title</span>
+                            <span className="text-sm font-medium text-gray-700">
+                              Meta Title
+                            </span>
                           </div>
                           <div className="pl-6 space-y-1">
                             <p className="text-sm text-gray-600">
-                              <span className="font-medium text-blue-600">UK:</span> {key.metaTitleUk}
+                              <span className="font-medium text-blue-600">
+                                UK:
+                              </span>{" "}
+                              {key.metaTitleUk}
                             </p>
                             {key.metaTitleUk !== key.metaTitleRu && (
                               <p className="text-sm text-gray-600">
-                                <span className="font-medium text-red-600">RU:</span> {key.metaTitleRu}
+                                <span className="font-medium text-red-600">
+                                  RU:
+                                </span>{" "}
+                                {key.metaTitleRu}
                               </p>
                             )}
                           </div>
@@ -192,18 +229,24 @@ export default function SatelliteKeysPage() {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 mb-2">
                             <FileText className="w-4 h-4 text-orange-600" />
-                            <span className="text-sm font-medium text-gray-700">Описания</span>
+                            <span className="text-sm font-medium text-gray-700">
+                              Описания
+                            </span>
                           </div>
                           <div className="pl-6 space-y-2">
                             <div>
-                              <span className="text-xs font-medium text-blue-600 block mb-1">UK:</span>
+                              <span className="text-xs font-medium text-blue-600 block mb-1">
+                                UK:
+                              </span>
                               <p className="text-sm text-gray-600 bg-blue-50 p-2 rounded-lg">
                                 {key.descriptionUk}
                               </p>
                             </div>
                             {key.descriptionUk !== key.descriptionRu && (
                               <div>
-                                <span className="text-xs font-medium text-red-600 block mb-1">RU:</span>
+                                <span className="text-xs font-medium text-red-600 block mb-1">
+                                  RU:
+                                </span>
                                 <p className="text-sm text-gray-600 bg-red-50 p-2 rounded-lg">
                                   {key.descriptionRu}
                                 </p>
@@ -215,18 +258,24 @@ export default function SatelliteKeysPage() {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 mb-2">
                             <Globe className="w-4 h-4 text-indigo-600" />
-                            <span className="text-sm font-medium text-gray-700">Meta Description</span>
+                            <span className="text-sm font-medium text-gray-700">
+                              Meta Description
+                            </span>
                           </div>
                           <div className="pl-6 space-y-2">
                             <div>
-                              <span className="text-xs font-medium text-blue-600 block mb-1">UK:</span>
+                              <span className="text-xs font-medium text-blue-600 block mb-1">
+                                UK:
+                              </span>
                               <p className="text-sm text-gray-600 bg-blue-50 p-2 rounded-lg">
                                 {key.metaDescUk}
                               </p>
                             </div>
                             {key.metaDescUk !== key.metaDescRu && (
                               <div>
-                                <span className="text-xs font-medium text-red-600 block mb-1">RU:</span>
+                                <span className="text-xs font-medium text-red-600 block mb-1">
+                                  RU:
+                                </span>
                                 <p className="text-sm text-gray-600 bg-red-50 p-2 rounded-lg">
                                   {key.metaDescRu}
                                 </p>
@@ -238,17 +287,23 @@ export default function SatelliteKeysPage() {
 
                       {/* Слаги */}
                       <div className="mb-4 bg-gray-50 p-3 rounded-lg">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">URL Slugs</h4>
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">
+                          URL Slugs
+                        </h4>
                         <div className="space-y-1">
                           <p className="text-sm text-gray-600">
-                            <span className="font-medium text-blue-600">UK:</span> 
+                            <span className="font-medium text-blue-600">
+                              UK:
+                            </span>
                             <span className="ml-2 px-2 py-1 bg-white border rounded text-xs font-mono">
                               {key.slugUk}
                             </span>
                           </p>
                           {key.slugUk !== key.slugRu && (
                             <p className="text-sm text-gray-600">
-                              <span className="font-medium text-red-600">RU:</span>
+                              <span className="font-medium text-red-600">
+                                RU:
+                              </span>
                               <span className="ml-2 px-2 py-1 bg-white border rounded text-xs font-mono">
                                 {key.slugRu}
                               </span>
@@ -262,13 +317,20 @@ export default function SatelliteKeysPage() {
                         <div className="flex items-center gap-1 text-sm text-gray-600">
                           <Satellite className="w-4 h-4" />
                           <span>
-                            {key.satellites?.length || 0} сателлит{key.satellites?.length === 1 ? '' : (key.satellites && key.satellites?.length > 4 ? 'ов' : 'а')}
+                            {key.satellites?.length || 0} сателлит
+                            {key.satellites?.length === 1
+                              ? ""
+                              : key.satellites && key.satellites?.length > 4
+                              ? "ов"
+                              : "а"}
                           </span>
                         </div>
                         <div className="flex items-center gap-1 text-xs text-gray-400">
                           <Calendar className="w-3 h-3" />
                           <span>
-                            {new Date(key.createdAt).toLocaleDateString('ru-RU')}
+                            {new Date(key.createdAt).toLocaleDateString(
+                              "ru-RU"
+                            )}
                           </span>
                         </div>
                       </div>
@@ -281,7 +343,10 @@ export default function SatelliteKeysPage() {
                           </p>
                           <div className="space-y-1">
                             {key.satellites.slice(0, 3).map((satellite) => (
-                              <p key={satellite.id} className="text-xs text-green-600">
+                              <p
+                                key={satellite.id}
+                                className="text-xs text-green-600"
+                              >
                                 • {satellite.titleRu}
                               </p>
                             ))}
@@ -297,13 +362,10 @@ export default function SatelliteKeysPage() {
                   </div>
 
                   <div className="flex items-center gap-2 ml-4 flex-shrink-0">
-                    <button
-                      onClick={() => openModal("edit", key)}
-                      className="w-10 h-10 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center transition-colors"
-                      title="Редактировать"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
+                    <EditButton
+                      item={key}
+                      handleClick={(key) => openModal("edit", key)}
+                    />
                     <button
                       onClick={() => deleteKey(key.id)}
                       className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"

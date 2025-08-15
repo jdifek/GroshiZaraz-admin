@@ -4,15 +4,12 @@ import { useEffect, useState } from "react";
 import { 
   Search, 
   Calendar, 
-  ChevronDown, 
-  ChevronUp,
   MessageSquare,
   Tag,
   User,
   Mail,
   Building2,
   Star,
-  Users,
   Clock,
   Globe,
   CheckCircle,
@@ -27,6 +24,7 @@ import { TrashButton } from "../ui/Buttons/TrashButton";
 import { EditButton } from "../ui/Buttons/EditButton";
 import QuestionService from "../services/Question/QuestionService";
 import { Question } from "../services/Question/questionTypes";
+import { ExpandCollapseButton } from "../ui/Buttons/ExpandCollapseButton";
 
 export default function QuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -388,17 +386,10 @@ export default function QuestionsPage() {
                     {/* Кнопки управления */}
                     <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                       {/* Кнопка разворачивания/сворачивания */}
-                      <button
-                        onClick={() => toggleCardExpansion(question.id)}
-                        className="w-10 h-10 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center transition-colors"
-                        title={isExpanded ? "Свернуть" : "Развернуть"}
-                      >
-                        {isExpanded ? (
-                          <ChevronUp className="w-5 h-5" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5" />
-                        )}
-                      </button>
+                      <ExpandCollapseButton
+  isExpanded={isExpanded}
+  onToggle={() => toggleCardExpansion(question.id)}
+/>
                       
                       <EditButton
                         item={question}
