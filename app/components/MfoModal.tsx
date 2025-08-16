@@ -36,6 +36,7 @@ export default function MfoModal({ isOpen, onClose, mode, mfo, onSubmitSuccess }
     website: '',
     description: '',
     ageFrom: 18,
+    slug: '',
     ageTo: 65,
     citizenship: '',
     documents: '',

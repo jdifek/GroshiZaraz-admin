@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { useState, useEffect } from "react";
-import { Search, Plus, Trash2 } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import CategoryModal from "../components/CategoryModal";
 import { Category } from "../services/categories/categoriesTypes";

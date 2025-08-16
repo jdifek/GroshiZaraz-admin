@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { User, UserCheck, X, Edit3 } from 'lucide-react';
+import { User, UserCheck, X } from 'lucide-react';
 
 interface Expert {
   id: number;

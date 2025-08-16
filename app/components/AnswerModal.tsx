@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useState, useEffect } from 'react';
 import { User, Star, X } from 'lucide-react';
 
@@ -15,11 +16,12 @@ interface Expert {
 interface AnswerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSave: (data: any) => void;
   questionId: number;
 }
 
-export default function AnswerModal({ isOpen, onClose, onSave, questionId }: AnswerModalProps) {
+export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProps) {
   const [formData, setFormData] = useState({
     textOriginal: '',
     textUk: '',

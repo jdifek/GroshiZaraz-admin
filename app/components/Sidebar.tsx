@@ -6,7 +6,6 @@ import {
   Building2,
   FileText,
   MessageSquare,
-  Users,
   Settings,
   BarChart3,
   User,
@@ -15,9 +14,7 @@ import {
   ChevronRight,
   Shield,
   SatelliteDish,
-  Menu,
   ChevronLeft,
-  X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
