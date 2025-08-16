@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Search, 
-  Calendar, 
+import {
+  Search,
+  Calendar,
   MessageSquare,
   Tag,
   User,
@@ -15,10 +15,13 @@ import {
   CheckCircle,
   AlertCircle,
   Phone,
-  ExternalLink
+  ExternalLink,
+  Edit3,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import QuestionModal from "../components/QuestionModal";
+import AnswerModal from "../components/AnswerModal";
+import EditAnswerModal from "../components/EditAnswerModal"; // Импорт новой модалки
 import { BlueButton } from "../ui/Buttons/BlueButton";
 import { TrashButton } from "../ui/Buttons/TrashButton";
 import { EditButton } from "../ui/Buttons/EditButton";
@@ -35,6 +38,14 @@ export default function QuestionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
+  
+  // Состояние для модалки ответов
+  const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false);
+  const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null);
+
+  // Состояние для модалки редактирования ответов
+  const [isEditAnswerModalOpen, setIsEditAnswerModalOpen] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<any>(null);
 
   const fetchQuestions = async () => {
     setIsLoading(true);
@@ -80,10 +91,7 @@ export default function QuestionsPage() {
     }
   };
 
-  const openModal = (
-    mode: "create" | "edit",
-    item: Question | null = null
-  ) => {
+  const openModal = (mode: "create" | "edit", item: Question | null = null) => {
     setModalMode(mode);
     setSelectedItem(item);
     setIsModalOpen(true);
@@ -93,11 +101,72 @@ export default function QuestionsPage() {
     setExpandedCardId(expandedCardId === questionId ? null : questionId);
   };
 
-  const filteredQuestions = questions.filter((q) =>
-    q.textOriginal.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    q.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    q.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    q.subject?.toLowerCase().includes(searchTerm.toLowerCase())
+  // Функции для работы с ответами
+  const openAnswerModal = (questionId: number) => {
+    setSelectedQuestionId(questionId);
+    setIsAnswerModalOpen(true);
+  };
+
+  const handleSaveAnswer = async (data: any) => {
+    if (!selectedQuestionId) return;
+    
+    try {
+      const response = await fetch(`/api/questions/${selectedQuestionId}/answers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Ошибка при сохранении ответа');
+      }
+      
+      setIsAnswerModalOpen(false);
+      setSelectedQuestionId(null);
+      fetchQuestions();
+      toast.success('Ответ успешно добавлен');
+    } catch (error) {
+      toast.error('Ошибка при добавлении ответа');
+    }
+  };
+
+  // Функции для редактирования ответов
+  const openEditAnswerModal = (answer: any) => {
+    setSelectedAnswer(answer);
+    setIsEditAnswerModalOpen(true);
+  };
+
+  const handleSaveEditAnswer = async (answerId: number, data: any) => {
+    try {
+      const response = await fetch(`/api/questions/answers/${answerId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Ошибка при обновлении ответа');
+      }
+      
+      setIsEditAnswerModalOpen(false);
+      setSelectedAnswer(null);
+      fetchQuestions();
+      toast.success('Ответ успешно обновлён');
+    } catch (error) {
+      toast.error('Ошибка при обновлении ответа');
+    }
+  };
+
+  const filteredQuestions = questions.filter(
+    (q) =>
+      q.textOriginal.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.subject?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -112,7 +181,10 @@ export default function QuestionsPage() {
             Модерация и управление вопросами пользователей ({questions.length})
           </p>
         </div>
-        <BlueButton text="Добавить вопрос" onClick={() => openModal("create")} />
+        <BlueButton
+          text="Добавить вопрос"
+          onClick={() => openModal("create")}
+        />
       </div>
 
       {/* Поиск */}
@@ -155,7 +227,7 @@ export default function QuestionsPage() {
         ) : (
           filteredQuestions.map((question) => {
             const isExpanded = expandedCardId === question.id;
-            
+
             return (
               <div
                 key={question.id}
@@ -181,7 +253,9 @@ export default function QuestionsPage() {
                                   : "bg-yellow-50 text-yellow-600"
                               }`}
                             >
-                              {question.isModerated ? "Одобрено" : "На модерации"}
+                              {question.isModerated
+                                ? "Одобрено"
+                                : "На модерации"}
                             </span>
                             <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
                               {question.category || question.targetType}
@@ -193,7 +267,9 @@ export default function QuestionsPage() {
                         <div className="mb-4 text-sm text-gray-600 space-y-1">
                           <div className="flex items-center gap-2">
                             <User className="w-4 h-4 text-gray-400" />
-                            <span className="font-medium text-gray-700">Автор:</span> 
+                            <span className="font-medium text-gray-700">
+                              Автор:
+                            </span>
                             <span>{question.name || "Неизвестен"}</span>
                             {question.email && (
                               <>
@@ -208,9 +284,13 @@ export default function QuestionsPage() {
                         </div>
 
                         {/* Детальная информация - показывается при разворачивании */}
-                        <div className={`space-y-4 transition-all duration-300 overflow-hidden ${
-                          isExpanded ? 'max-h-none opacity-100' : 'max-h-0 opacity-0'
-                        }`}>
+                        <div
+                          className={`space-y-4 transition-all duration-300 overflow-hidden ${
+                            isExpanded
+                              ? "max-h-none opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
+                        >
                           {/* Полный текст вопроса */}
                           <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-400">
                             <div className="flex items-center gap-2 mb-2">
@@ -256,6 +336,116 @@ export default function QuestionsPage() {
                             </div>
                           )}
 
+                          {/* Ответы на вопрос */}
+                          {question.answers && question.answers.length > 0 ? (
+                            <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
+                              <div className="flex items-center gap-2 mb-3">
+                                <MessageSquare className="w-4 h-4 text-green-600" />
+                                <span className="text-sm font-medium text-green-700">
+                                  Ответы ({question.answers.length})
+                                </span>
+                                <button
+                                  onClick={() => openAnswerModal(question.id)}
+                                  className="ml-auto px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full hover:bg-green-200 transition-colors"
+                                >
+                                  + Добавить ответ
+                                </button>
+                              </div>
+                              <div className="space-y-3">
+                                {question.answers.map((answer) => (
+                                  <div
+                                    key={answer.id}
+                                    className={`p-3 rounded-lg border ${
+                                      answer.expert 
+                                        ? 'bg-blue-50 border-blue-200' 
+                                        : 'bg-white border-gray-200'
+                                    }`}
+                                  >
+                                    {/* Информация об авторе ответа */}
+                                    <div className="flex items-center gap-2 mb-2">
+                                      {answer.expert ? (
+                                        <>
+                                          {answer.expert.avatar && (
+                                            <img
+                                              src={answer.expert.avatar}
+                                              alt={answer.expert.name}
+                                              className="w-6 h-6 rounded-full"
+                                            />
+                                          )}
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium text-blue-700">
+                                              {answer.expert.name}
+                                            </span>
+                                            <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                              Эксперт
+                                            </span>
+                                          </div>
+                                          {answer.expert.position && (
+                                            <span className="text-xs text-gray-500">
+                                              • {answer.expert.position}
+                                            </span>
+                                          )}
+                                        </>
+                                      ) : (
+                                        <>
+                                          <User className="w-4 h-4 text-gray-500" />
+                                          <span className="text-sm font-medium text-gray-600">
+                                            {answer.authorName || 'Пользователь'}
+                                          </span>
+                                          {answer.authorEmail && (
+                                            <span className="text-xs text-gray-500">
+                                              • {answer.authorEmail}
+                                            </span>
+                                          )}
+                                        </>
+                                      )}
+                                      <span className="text-xs text-gray-400 ml-auto">
+                                        {new Date(answer.createdAt).toLocaleDateString('ru-RU')}
+                                      </span>
+                                      
+                                      {/* Кнопка редактирования ответа */}
+                                      <button
+                                        onClick={() => openEditAnswerModal(answer)}
+                                        className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors ml-2"
+                                        title="Редактировать ответ"
+                                      >
+                                        <Edit3 className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                    
+                                    {/* Текст ответа */}
+                                    <p className={`text-sm ${
+                                      answer.expert ? 'text-blue-800' : 'text-gray-700'
+                                    }`}>
+                                      {answer.textOriginal}
+                                    </p>
+
+                                    {/* Статус модерации */}
+                                    <div className="flex items-center gap-2 mt-2">
+                                      <span className={`px-2 py-1 rounded-full text-xs ${
+                                        answer.isModerated
+                                          ? 'bg-green-100 text-green-700'
+                                          : 'bg-yellow-100 text-yellow-700'
+                                      }`}>
+                                        {answer.isModerated ? 'Одобрено' : 'На модерации'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            /* Кнопка добавления первого ответа */
+                            <div className="mt-4">
+                              <button
+                                onClick={() => openAnswerModal(question.id)}
+                                className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors"
+                              >
+                                + Добавить первый ответ на вопрос
+                              </button>
+                            </div>
+                          )}
+
                           {/* Информация о связанном МФО */}
                           {question.mfo && (
                             <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
@@ -285,10 +475,12 @@ export default function QuestionsPage() {
                                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500 mb-2">
                                     <span className="flex items-center gap-1">
                                       <Star className="w-3 h-3" />
-                                      {question.mfo.rating} ({question.mfo.reviews} отзывов)
+                                      {question.mfo.rating} (
+                                      {question.mfo.reviews} отзывов)
                                     </span>
                                     <span>
-                                      {question.mfo.minAmount}-{question.mfo.maxAmount}₴
+                                      {question.mfo.minAmount}-
+                                      {question.mfo.maxAmount}₴
                                     </span>
                                     <span className="flex items-center gap-1">
                                       <Clock className="w-3 h-3" />
@@ -317,7 +509,9 @@ export default function QuestionsPage() {
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-xs text-gray-500 mb-1">Лицензия</p>
+                                  <p className="text-xs text-gray-500 mb-1">
+                                    Лицензия
+                                  </p>
                                   <p className="text-sm font-medium text-gray-700">
                                     {question.mfo.licenseNumber}
                                   </p>
@@ -334,17 +528,25 @@ export default function QuestionsPage() {
                                   )}
                                 </div>
                               </div>
-                              
+
                               {/* Дополнительная информация о МФО */}
                               <div className="mt-3 grid md:grid-cols-2 gap-3 text-xs text-gray-600">
                                 <div>
-                                  <span className="font-medium">Возраст:</span> {question.mfo.ageFrom}-{question.mfo.ageTo} лет
+                                  <span className="font-medium">Возраст:</span>{" "}
+                                  {question.mfo.ageFrom}-{question.mfo.ageTo}{" "}
+                                  лет
                                 </div>
                                 <div>
-                                  <span className="font-medium">Документы:</span> {question.mfo.documents}
+                                  <span className="font-medium">
+                                    Документы:
+                                  </span>{" "}
+                                  {question.mfo.documents}
                                 </div>
                                 <div>
-                                  <span className="font-medium">Гражданство:</span> {question.mfo.citizenship}
+                                  <span className="font-medium">
+                                    Гражданство:
+                                  </span>{" "}
+                                  {question.mfo.citizenship}
                                 </div>
                                 {question.mfo.phone && (
                                   <div className="flex items-center gap-1">
@@ -353,10 +555,11 @@ export default function QuestionsPage() {
                                   </div>
                                 )}
                               </div>
-                              
+
                               {question.mfo.description && (
                                 <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                                  <span className="font-medium">Описание:</span> {question.mfo.description}
+                                  <span className="font-medium">Описание:</span>{" "}
+                                  {question.mfo.description}
                                 </div>
                               )}
                             </div>
@@ -367,7 +570,10 @@ export default function QuestionsPage() {
                             <div className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               <span>
-                                Создан: {new Date(question.createdAt).toLocaleDateString("ru-RU")}
+                                Создан:{" "}
+                                {new Date(
+                                  question.createdAt
+                                ).toLocaleDateString("ru-RU")}
                               </span>
                             </div>
                             <div className="flex items-center gap-1">
@@ -387,15 +593,18 @@ export default function QuestionsPage() {
                     <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                       {/* Кнопка разворачивания/сворачивания */}
                       <ExpandCollapseButton
-  isExpanded={isExpanded}
-  onToggle={() => toggleCardExpansion(question.id)}
-/>
-                      
+                        isExpanded={isExpanded}
+                        onToggle={() => toggleCardExpansion(question.id)}
+                      />
+
                       <EditButton
                         item={question}
                         handleClick={(q) => openModal("edit", q)}
                       />
-                      <TrashButton id={question.id} handleClick={handleDelete} />
+                      <TrashButton
+                        id={question.id}
+                        handleClick={handleDelete}
+                      />
                     </div>
                   </div>
                 </div>
@@ -405,13 +614,35 @@ export default function QuestionsPage() {
         )}
       </div>
 
-      {/* Модалка */}
+      {/* Модалка для вопросов */}
       <QuestionModal
         isOpen={isModalOpen}
         mode={modalMode}
         question={selectedItem}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
+      />
+
+      {/* Модалка для ответов */}
+      <AnswerModal
+        isOpen={isAnswerModalOpen}
+        onClose={() => {
+          setIsAnswerModalOpen(false);
+          setSelectedQuestionId(null);
+        }}
+        onSave={handleSaveAnswer}
+        questionId={selectedQuestionId || 0}
+      />
+
+      {/* Модалка для редактирования ответов */}
+      <EditAnswerModal
+        isOpen={isEditAnswerModalOpen}
+        onClose={() => {
+          setIsEditAnswerModalOpen(false);
+          setSelectedAnswer(null);
+        }}
+        onSave={handleSaveEditAnswer}
+        answer={selectedAnswer}
       />
     </div>
   );

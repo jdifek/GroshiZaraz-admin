@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Search, 
-  Trash2, 
-  Star, 
+import {
+  Search,
+  Trash2,
+  Star,
   Clock,
   CreditCard,
   CheckCircle,
@@ -78,10 +78,11 @@ export default function MfosPage() {
     setExpandedCardId(expandedCardId === mfoId ? null : mfoId);
   };
 
-  const filteredMfos = mfos.filter((mfo) =>
-    mfo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    mfo.slug?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    mfo.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredMfos = mfos.filter(
+    (mfo) =>
+      mfo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mfo.slug?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mfo.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -140,7 +141,7 @@ export default function MfosPage() {
         ) : (
           filteredMfos.map((mfo) => {
             const isExpanded = expandedCardId === mfo.id;
-            
+
             return (
               <div
                 key={mfo.id}
@@ -149,7 +150,6 @@ export default function MfosPage() {
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-start gap-4 flex-1">
-                     
                       <div className="flex-1 min-w-0">
                         {/* Основная информация - всегда видна */}
                         <div className="flex items-center gap-3 mb-4">
@@ -171,12 +171,16 @@ export default function MfosPage() {
                               {mfo.isActive ? (
                                 <div className="flex items-center gap-1">
                                   <CheckCircle className="w-4 h-4 text-green-500" />
-                                  <span className="text-sm text-green-600 font-medium">Активна</span>
+                                  <span className="text-sm text-green-600 font-medium">
+                                    Активна
+                                  </span>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-1">
                                   <XCircle className="w-4 h-4 text-red-500" />
-                                  <span className="text-sm text-red-600 font-medium">Неактивна</span>
+                                  <span className="text-sm text-red-600 font-medium">
+                                    Неактивна
+                                  </span>
                                 </div>
                               )}
                               {mfo.licenseNumber && (
@@ -193,16 +197,21 @@ export default function MfosPage() {
                           <div className="bg-blue-50 p-3 rounded-lg">
                             <div className="flex items-center gap-1 mb-1">
                               <DollarSign className="w-4 h-4 text-blue-600" />
-                              <span className="text-blue-700 font-medium">Сумма</span>
+                              <span className="text-blue-700 font-medium">
+                                Сумма
+                              </span>
                             </div>
                             <p className="font-semibold text-gray-800">
-                              {mfo.minAmount.toLocaleString()} - {mfo.maxAmount.toLocaleString()} ₴
+                              {mfo.minAmount.toLocaleString()} -{" "}
+                              {mfo.maxAmount.toLocaleString()} ₴
                             </p>
                           </div>
                           <div className="bg-purple-50 p-3 rounded-lg">
                             <div className="flex items-center gap-1 mb-1">
                               <Clock className="w-4 h-4 text-purple-600" />
-                              <span className="text-purple-700 font-medium">Срок</span>
+                              <span className="text-purple-700 font-medium">
+                                Срок
+                              </span>
                             </div>
                             <p className="font-semibold text-gray-800">
                               {mfo.minTerm} - {mfo.maxTerm} дней
@@ -211,19 +220,29 @@ export default function MfosPage() {
                           <div className="bg-orange-50 p-3 rounded-lg">
                             <div className="flex items-center gap-1 mb-1">
                               <Star className="w-4 h-4 text-orange-600" />
-                              <span className="text-orange-700 font-medium">Рейтинг</span>
+                              <span className="text-orange-700 font-medium">
+                                Рейтинг
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <p className="font-semibold text-gray-800">{mfo.rating}</p>
-                              <span className="text-xs text-gray-500">({mfo.reviews})</span>
+                              <p className="font-semibold text-gray-800">
+                                {mfo.rating}
+                              </p>
+                              <span className="text-xs text-gray-500">
+                                ({mfo.reviews})
+                              </span>
                             </div>
                           </div>
                           <div className="bg-green-50 p-3 rounded-lg">
                             <div className="flex items-center gap-1 mb-1">
                               <Award className="w-4 h-4 text-green-600" />
-                              <span className="text-green-700 font-medium">Одобрение</span>
+                              <span className="text-green-700 font-medium">
+                                Одобрение
+                              </span>
                             </div>
-                            <p className="font-semibold text-gray-800">{mfo.approvalRate}%</p>
+                            <p className="font-semibold text-gray-800">
+                              {mfo.approvalRate}%
+                            </p>
                           </div>
                         </div>
 
@@ -251,17 +270,25 @@ export default function MfosPage() {
                         </div>
 
                         {/* Детальная информация - показывается при разворачивании */}
-                        <div className={`space-y-4 transition-all duration-300 overflow-hidden ${
-                          isExpanded ? 'max-h-none opacity-100' : 'max-h-0 opacity-0'
-                        }`}>
+                        <div
+                          className={`space-y-4 transition-all duration-300 overflow-hidden ${
+                            isExpanded
+                              ? "max-h-none opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
+                        >
                           {/* Описание */}
                           {mfo.description && (
                             <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
                               <div className="flex items-center gap-2 mb-2">
                                 <FileText className="w-4 h-4 text-blue-600" />
-                                <span className="text-sm font-medium text-blue-700">Описание</span>
+                                <span className="text-sm font-medium text-blue-700">
+                                  Описание
+                                </span>
                               </div>
-                              <p className="text-sm text-blue-600">{mfo.description}</p>
+                              <p className="text-sm text-blue-600">
+                                {mfo.description}
+                              </p>
                             </div>
                           )}
 
@@ -271,12 +298,29 @@ export default function MfosPage() {
                               <div className="p-3 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-2 mb-2">
                                   <UserCheck className="w-4 h-4 text-gray-600" />
-                                  <span className="text-sm font-medium text-gray-700">Требования к заемщику</span>
+                                  <span className="text-sm font-medium text-gray-700">
+                                    Требования к заемщику
+                                  </span>
                                 </div>
                                 <div className="space-y-1 text-sm text-gray-600">
-                                  <p><span className="font-medium">Возраст:</span> {mfo.ageFrom} - {mfo.ageTo} лет</p>
-                                  <p><span className="font-medium">Гражданство:</span> {mfo.citizenship}</p>
-                                  <p><span className="font-medium">Документы:</span> {mfo.documents}</p>
+                                  <p>
+                                    <span className="font-medium">
+                                      Возраст:
+                                    </span>{" "}
+                                    {mfo.ageFrom} - {mfo.ageTo} лет
+                                  </p>
+                                  <p>
+                                    <span className="font-medium">
+                                      Гражданство:
+                                    </span>{" "}
+                                    {mfo.citizenship}
+                                  </p>
+                                  <p>
+                                    <span className="font-medium">
+                                      Документы:
+                                    </span>{" "}
+                                    {mfo.documents}
+                                  </p>
                                 </div>
                               </div>
                             </div>
@@ -285,12 +329,25 @@ export default function MfosPage() {
                               <div className="p-3 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-2 mb-2">
                                   <Clock className="w-4 h-4 text-gray-600" />
-                                  <span className="text-sm font-medium text-gray-700">График работы</span>
+                                  <span className="text-sm font-medium text-gray-700">
+                                    График работы
+                                  </span>
                                 </div>
                                 <div className="space-y-1 text-sm text-gray-600">
-                                  <p><span className="font-medium">Будни:</span> {mfo.workTimeWeekdays}</p>
-                                  <p><span className="font-medium">Выходные:</span> {mfo.workTimeWeekend}</p>
-                                  <p><span className="font-medium">Онлайн:</span> {mfo.workTimeOnline}</p>
+                                  <p>
+                                    <span className="font-medium">Будни:</span>{" "}
+                                    {mfo.workTimeWeekdays}
+                                  </p>
+                                  <p>
+                                    <span className="font-medium">
+                                      Выходные:
+                                    </span>{" "}
+                                    {mfo.workTimeWeekend}
+                                  </p>
+                                  <p>
+                                    <span className="font-medium">Онлайн:</span>{" "}
+                                    {mfo.workTimeOnline}
+                                  </p>
                                 </div>
                               </div>
                             </div>
@@ -300,7 +357,9 @@ export default function MfosPage() {
                           <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
                             <div className="flex items-center gap-2 mb-3">
                               <Shield className="w-4 h-4 text-green-600" />
-                              <span className="text-sm font-medium text-green-700">Дополнительные преимущества</span>
+                              <span className="text-sm font-medium text-green-700">
+                                Дополнительные преимущества
+                              </span>
                             </div>
                             <div className="grid md:grid-cols-3 gap-3">
                               {mfo.isNoIncomeProof && (
@@ -336,7 +395,9 @@ export default function MfosPage() {
                               <div className="p-3 bg-indigo-50 rounded-lg">
                                 <div className="flex items-center gap-2 mb-2">
                                   <Globe className="w-4 h-4 text-indigo-600" />
-                                  <span className="text-sm font-medium text-indigo-700">Контакты</span>
+                                  <span className="text-sm font-medium text-indigo-700">
+                                    Контакты
+                                  </span>
                                 </div>
                                 <div className="space-y-1">
                                   {mfo.website && (
@@ -363,11 +424,19 @@ export default function MfosPage() {
                             <div className="p-3 bg-purple-50 rounded-lg">
                               <div className="flex items-center gap-2 mb-2">
                                 <CreditCard className="w-4 h-4 text-purple-600" />
-                                <span className="text-sm font-medium text-purple-700">Технические данные</span>
+                                <span className="text-sm font-medium text-purple-700">
+                                  Технические данные
+                                </span>
                               </div>
                               <div className="space-y-1 text-sm text-gray-600">
-                                <p><span className="font-medium">Slug:</span> {mfo.slug}</p>
-                                <p><span className="font-medium">ID:</span> {mfo.id}</p>
+                                <p>
+                                  <span className="font-medium">Slug:</span>{" "}
+                                  {mfo.slug}
+                                </p>
+                                <p>
+                                  <span className="font-medium">ID:</span>{" "}
+                                  {mfo.id}
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -377,13 +446,19 @@ export default function MfosPage() {
                             <div className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               <span>
-                                Создано: {new Date(mfo.createdAt).toLocaleDateString("ru-RU")}
+                                Создано:{" "}
+                                {new Date(mfo.createdAt).toLocaleDateString(
+                                  "ru-RU"
+                                )}
                               </span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               <span>
-                                Обновлено: {new Date(mfo.updatedAt).toLocaleDateString("ru-RU")}
+                                Обновлено:{" "}
+                                {new Date(mfo.updatedAt).toLocaleDateString(
+                                  "ru-RU"
+                                )}
                               </span>
                             </div>
                           </div>
@@ -395,11 +470,11 @@ export default function MfosPage() {
                     <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                       {/* Кнопка разворачивания/сворачивания */}
                       <ExpandCollapseButton
-  isExpanded={isExpanded}
-  onToggle={() => toggleCardExpansion(mfo.id)}
-/>
+                        isExpanded={isExpanded}
+                        onToggle={() => toggleCardExpansion(mfo.id)}
+                      />
 
-<EditButton
+                      <EditButton
                         item={mfo}
                         handleClick={(mfo) => openModal("edit", mfo)}
                       />

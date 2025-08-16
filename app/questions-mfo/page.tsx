@@ -276,9 +276,14 @@ export default function QuestionsServicePage() {
                                 </span>
                               </div>
                               <div className="space-y-2">
-                                {question.answers.map((answer, index) => (
-                                  <div key={index} className="p-3 bg-white rounded-lg border">
-                                    <p className="text-sm text-gray-700">{answer}</p>
+                                {question.answers.map((answer) => (
+                                  <div
+                                    key={answer.id}
+                                    className="p-3 bg-white rounded-lg border"
+                                  >
+                                    <p className="text-sm text-gray-700">
+                                      {answer.textOriginal}
+                                    </p>
                                   </div>
                                 ))}
                               </div>
