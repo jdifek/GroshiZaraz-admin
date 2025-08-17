@@ -45,6 +45,7 @@ export default function RootLayout({
                   }`}>
                     <Sidebar />
                   </div>
+                  
           
                   {/* Main content — правая часть */}
                   <div className={`flex-1 min-h-screen overflow-y-auto scrollbar-none transition-all duration-300 ${

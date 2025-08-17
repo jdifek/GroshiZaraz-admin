@@ -5,6 +5,7 @@ import NewsService from "../services/news/newsService";
 import { Category } from "../services/categories/categoriesTypes";
 import { Author } from "../services/authors/authorsTypes";
 import { toast } from "react-toastify";
+import { Dropdown } from "../ui/Dropdowns/Dropdown";
 
 interface NewsModalProps {
   isOpen: boolean;
@@ -40,11 +41,7 @@ export default function NewsModal({
     createdAt: "", // или Date, если хочешь
   });
 
-  const [authorDropdownOpen, setAuthorDropdownOpen] = useState(false);
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
 
-  const authorRef = useRef<HTMLDivElement>(null);
-  const categoryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (newsItem && mode === "edit") {
@@ -80,25 +77,7 @@ export default function NewsModal({
     }
   }, [newsItem, mode]);
 
-  // Закрываем дропдауны при клике вне
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        authorRef.current &&
-        !authorRef.current.contains(event.target as Node)
-      ) {
-        setAuthorDropdownOpen(false);
-      }
-      if (
-        categoryRef.current &&
-        !categoryRef.current.contains(event.target as Node)
-      ) {
-        setCategoryDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+
 
   if (!isOpen) return null;
 
@@ -133,7 +112,6 @@ export default function NewsModal({
       ...prev,
       authorId: id,
     }));
-    setAuthorDropdownOpen(false);
   };
 
   // Обработчик выбора из кастомного дропдауна (категория)
@@ -142,7 +120,6 @@ export default function NewsModal({
       ...prev,
       newsCategoryId: id,
     }));
-    setCategoryDropdownOpen(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -304,100 +281,19 @@ export default function NewsModal({
           </div>
 
           {/* Кастомный дропдаун для выбора автора */}
-          <div className="relative" ref={authorRef}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Автор
-            </label>
-            <button
-              type="button"
-              onClick={() => setAuthorDropdownOpen(!authorDropdownOpen)}
-              className="w-full text-black border border-gray-300 rounded-xl px-4 py-2 text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {authors.find((a) => a.id.toString() === formData.authorId)
-                ?.name || "Выберите автора"}
-              <svg
-                className={`w-5 h-5 ml-2 transition-transform duration-200 ${
-                  authorDropdownOpen ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            {authorDropdownOpen && (
-              <ul className="absolute text-black z-10 mt-1 w-full bg-white border border-gray-300 rounded-xl max-h-48 overflow-auto shadow-lg">
-                {authors.map((author) => (
-                  <li
-                    key={author.id}
-                    onClick={() => selectAuthor(author.id.toString())}
-                    className={`px-4 py-2 cursor-pointer hover:bg-blue-600 hover:text-white rounded-xl ${
-                      formData.authorId.toString() === author.id.toString()
-                        ? "bg-blue-600 text-white"
-                        : ""
-                    }`}
-                  >
-                    {author.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <Dropdown
+  label="Автор"
+  options={authors.map(a => ({ id: a.id, name: a.name }))}
+  value={formData.authorId}
+  onSelect={(id) => selectAuthor(id.toString())}
+/>
 
-          {/* Кастомный дропдаун для выбора категории */}
-          <div className="relative" ref={categoryRef}>
-            <label className="block  text-sm font-medium text-gray-700 mb-1">
-              Категория
-            </label>
-            <button
-              type="button"
-              onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-              className="w-full text-black border border-gray-300 rounded-xl px-4 py-2 text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {categories.find(
-                (c) => c.id.toString() === formData.newsCategoryId
-              )?.name || "Выберите категорию"}
-              <svg
-                className={`w-5 h-5 ml-2 transition-transform duration-200 ${
-                  categoryDropdownOpen ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            {categoryDropdownOpen && (
-              <ul className="absolute z-10 mt-1 w-full text-black bg-white border border-gray-300 rounded-xl max-h-48 overflow-auto shadow-lg">
-                {categories.map((category) => (
-                  <li
-                    key={category.id}
-                    onClick={() => selectCategory(category.id.toString())}
-                    className={`px-4 py-2 cursor-pointer hover:bg-blue-600 hover:text-white rounded-xl ${
-                      formData.newsCategoryId.toString() ===
-                      category.id.toString()
-                        ? "bg-blue-600 text-white"
-                        : ""
-                    }`}
-                  >
-                    {category.name} {category.icon}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+<Dropdown
+  label="Категория"
+  options={categories.map(c => ({ id: c.id, name: c.name, icon: c.icon }))}
+  value={formData.newsCategoryId}
+  onSelect={(id) => selectCategory(id.toString())}
+/>
 
           <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
             <button

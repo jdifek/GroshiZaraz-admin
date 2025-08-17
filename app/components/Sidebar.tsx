@@ -131,11 +131,10 @@ export default function Sidebar() {
       <div className="fixed left-0 top-1/2 transform -translate-y-1/2 z-50">
         <button
           onClick={toggleSidebar}
-          className="bg-gradient-to-br from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-1 rounded-r-2xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 group"
+          className="bg-gradient-to-br  cursor-pointer from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-1 rounded-r-2xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 group"
           style={{ height: "13vh", minHeight: "10px" }}
         >
           <div className="flex flex-col items-center justify-center h-full gap-3">
-          
             <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center group-hover:bg-white/30 transition-colors">
               <ChevronRight className="w-4 h-4" />
             </div>
@@ -150,19 +149,32 @@ export default function Sidebar() {
 
   // Полный сайдбар (когда развернут)
   return (
-    <div className="bg-white shadow-xl border-r border-gray-100 flex flex-col h-screen w-72">
-      {/* Кнопка сворачивания */}
-      <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-        <h1 className="text-lg font-bold text-gray-800">MFO Admin</h1>
-        <button
-          onClick={toggleSidebar}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors group"
-        >
-          <ChevronLeft className="w-5 h-5 text-gray-600 group-hover:text-gray-800" />
-        </button>
-      </div>
-
+    <div className="bg-white relative shadow-xl border-r border-gray-100 flex flex-col h-screen w-72">
       {/* Логотип */}
+  {/* Кнопка для сворачивания/разворачивания сайдбара */}
+<div className="fixed cursor-pointer top-1/2 -translate-y-1/2 left-72 z-50 transition-all duration-300"
+     style={{ left: isCollapsed ? "0px" : "288px" }}>
+
+  <button
+    onClick={toggleSidebar}
+    className="bg-gradient-to-br cursor-pointer from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700
+               text-white p-1 rounded-r-2xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 group"
+    style={{ height: "13vh", minHeight: "10px" }}
+  >
+    <div className="flex cursor-pointer flex-col items-center justify-center h-full gap-3">
+      <div className="w-6 h-6 cursor-pointer bg-white/20 rounded-md flex items-center justify-center group-hover:bg-white/30 transition-colors">
+        {isCollapsed ? (
+          <ChevronRight className="w-4 h-4" />
+        ) : (
+          <ChevronLeft className="w-4 h-4" />
+        )}
+      </div>
+     
+    </div>
+  </button>
+</div>
+
+
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl flex-shrink-0 shadow-lg">
@@ -172,16 +184,22 @@ export default function Sidebar() {
             <h2 className="text-xl font-bold text-gray-800">MFO Admin</h2>
             <p className="text-sm text-gray-500">Панель управления</p>
           </div>
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors group"
+          >
+            <ChevronLeft className="w-5 h-5 text-gray-600 group-hover:text-gray-800" />
+          </button>
         </div>
       </div>
 
       {/* Профиль пользователя */}
       {user && (
-        <div className="p-4 border-b border-gray-100">
-          <div className="relative">
+        <div className="p-4 border-b  border-gray-100">
+          <div className="relative ">
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50  cursor-pointer transition-colors"
             >
               <div className="w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-md">
                 {formatUserName().charAt(0).toUpperCase()}
@@ -203,7 +221,7 @@ export default function Sidebar() {
             </button>
 
             {isUserMenuOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-100 z-50">
+              <div className="absolute  top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-100 z-50">
                 <div className="py-2">
                   <div className="px-4 py-3 border-b border-gray-100">
                     <p className="text-xs text-gray-500 mb-1">Email</p>
@@ -212,21 +230,23 @@ export default function Sidebar() {
                     </p>
                   </div>
                   <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-xs text-gray-500 mb-1">ID пользователя</p>
+                    <p className="text-xs text-gray-500 mb-1">
+                      ID пользователя
+                    </p>
                     <p className="text-sm font-medium text-gray-800">
                       {user.id}
                     </p>
                   </div>
                   <button
                     onClick={() => setIsUserMenuOpen(false)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="w-full flex  cursor-pointer items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     <User className="w-4 h-4" />
                     Профиль
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    className="w-full flex  cursor-pointer items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
                     Выйти
@@ -250,7 +270,7 @@ export default function Sidebar() {
               <div key={item.label}>
                 <button
                   onClick={() => toggleGroup(item.label)}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+                  className="w-full   cursor-pointer flex items-center justify-between px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <Icon className="w-5 h-5 flex-shrink-0" />
@@ -297,7 +317,9 @@ export default function Sidebar() {
               }`}
             >
               <Icon
-                className={`w-5 h-5 ${isActive ? "text-white" : "text-gray-500"} flex-shrink-0`}
+                className={`w-5 h-5 ${
+                  isActive ? "text-white" : "text-gray-500"
+                } flex-shrink-0`}
               />
               <span className="font-medium">{item.label}</span>
             </Link>

@@ -1,18 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/settings/page.tsx
 "use client";
-import React, { useState, useEffect } from 'react';
-import { 
-  UserPlus, 
-  Key, 
-  Trash2, 
-  Edit, 
-  Save, 
-  X, 
-  Shield, 
-  Mail, 
-  User, 
-  Lock, 
+import React, { useState, useEffect } from "react";
+import {
+  UserPlus,
+  Key,
+  Edit,
+  Save,
+  X,
+  Shield,
+  Mail,
+  Lock,
   Users,
   Search,
   Eye,
@@ -23,44 +21,18 @@ import {
   CheckCircle,
   AlertCircle,
   Filter,
-} from 'lucide-react';
-import { UserProfile } from '../services/auth/authTypes';
-import { useAuth } from '../context/AuthContext';
-import { toast } from 'react-toastify';
-import AuthService from '../services/auth/authService';
-import { BlueButton } from '../ui/Buttons/BlueButton';
-import { GreenButton } from '../ui/Buttons/GreenButton';
-
-// Мок-данные пользователей (заменить на реальные запросы позже)
-const mockUsers: UserProfile[] = [
-  {
-    id: 1,
-    email: 'admin@example.com',
-    firstName: 'Admin',
-    lastName: 'User',
-    role: 'admin',
-    createdAt: '2024-01-01',
-    updatedAt: '2024-01-01',
-  },
-  {
-    id: 2,
-    email: 'editor@example.com',
-    firstName: 'Editor',
-    lastName: 'User',
-    role: 'editor',
-    createdAt: '2024-02-01',
-    updatedAt: '2024-02-01',
-  },
-  {
-    id: 3,
-    email: 'moderator@example.com',
-    firstName: 'Moderator',
-    lastName: 'User',
-    role: 'moderator',
-    createdAt: '2024-03-01',
-    updatedAt: '2024-03-01',
-  },
-];
+  User,
+} from "lucide-react";
+import { UserProfile } from "../services/auth/authTypes";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
+import AuthService from "../services/auth/authService";
+import { BlueButton } from "../ui/Buttons/BlueButton";
+import { GreenButton } from "../ui/Buttons/GreenButton";
+import { DeleteButton } from "../ui/Buttons/DeleteButton";
+import { User as UserType, UserPayload } from "../services/user/userTypes";
+import UserService from "../services/user/userService";
+import { Dropdown } from "../ui/Dropdowns/Dropdown";
 
 interface ChangePasswordForm {
   oldPassword: string;
@@ -73,12 +45,23 @@ interface NewUserForm {
   password: string;
   firstName?: string;
   lastName?: string;
-  role: string;
+  role: "USER" | "ADMIN";
 }
+
+// Функция для преобразования User в UserProfile для совместимости
+const mapUserToUserProfile = (user: UserType): UserProfile => ({
+  id: user.id,
+  email: user.email,
+  firstName: user.firstName,
+  lastName: user.lastName,
+  role: user.role.toLowerCase() as "admin" | "user",
+  createdAt: user.createdAt,
+  updatedAt: user.updatedAt,
+});
 
 export default function SettingsPage() {
   const { user, refreshAuth } = useAuth();
-  const [users, setUsers] = useState<UserProfile[]>(mockUsers);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -86,35 +69,50 @@ export default function SettingsPage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordForm, setPasswordForm] = useState<ChangePasswordForm>({
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [newUserForm, setNewUserForm] = useState<NewUserForm>({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    role: 'editor',
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    role: "USER",
   });
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
-  const [editingRole, setEditingRole] = useState<string>('');
+  const [editingRole, setEditingRole] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isUsersLoading, setIsUsersLoading] = useState(true);
 
-  // Симулируем загрузку пользователей (позже заменить на API)
+  // Загрузка пользователей с сервера
+  const loadUsers = async () => {
+    setIsUsersLoading(true);
+    try {
+      const usersData = await UserService.getAllUsers();
+      const mappedUsers = usersData.map(mapUserToUserProfile);
+      setUsers(mappedUsers);
+    } catch (error: any) {
+      console.error('Ошибка загрузки пользователей:', error);
+      toast.error('Ошибка загрузки пользователей');
+    } finally {
+      setIsUsersLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setUsers(mockUsers);
+    loadUsers();
   }, []);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error('Новый пароль и подтверждение не совпадают');
+      toast.error("Новый пароль и подтверждение не совпадают");
       return;
     }
     if (passwordForm.newPassword.length < 6) {
-      toast.error('Пароль должен быть не менее 6 символов');
+      toast.error("Пароль должен быть не менее 6 символов");
       return;
     }
 
@@ -124,53 +122,76 @@ export default function SettingsPage() {
         oldPassword: passwordForm.oldPassword,
         newPassword: passwordForm.newPassword,
       });
-      toast.success('Пароль успешно изменён');
+      toast.success("Пароль успешно изменён");
       setPasswordForm({
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: '',
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       });
       setIsChangingPassword(false);
       await refreshAuth();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Ошибка смены пароля');
+      toast.error(error.response?.data?.message || "Ошибка смены пароля");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCreateUser = (e: React.FormEvent) => {
+  const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUserForm.email || !newUserForm.password) {
-      toast.error('Email и пароль обязательны');
+      toast.error("Email и пароль обязательны");
       return;
     }
 
-    const newUser: UserProfile = {
-      id: users.length + 1,
-      email: newUserForm.email,
-      firstName: newUserForm.firstName,
-      lastName: newUserForm.lastName,
-      role: newUserForm.role,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setUsers([...users, newUser]);
-    toast.success('Пользователь создан (мок)');
-    setNewUserForm({
-      email: '',
-      password: '',
-      firstName: '',
-      lastName: '',
-      role: 'editor',
-    });
-    setIsCreatingUser(false);
+    setIsLoading(true);
+    try {
+      const userPayload: UserPayload = {
+        email: newUserForm.email,
+        password: newUserForm.password,
+        firstName: newUserForm.firstName,
+        lastName: newUserForm.lastName,
+        role: newUserForm.role,
+      };
+
+      await UserService.createUser(userPayload);
+      toast.success("Пользователь успешно создан");
+      
+      // Перезагружаем список пользователей
+      await loadUsers();
+      
+      // Сбрасываем форму
+      setNewUserForm({
+        email: "",
+        password: "",
+        firstName: "",
+        lastName: "",
+        role: "USER",
+      });
+      setIsCreatingUser(false);
+    } catch (error: any) {
+      console.error('Ошибка создания пользователя:', error);
+      toast.error(error.response?.data?.message || "Ошибка создания пользователя");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDeleteUser = (id: number) => {
-    if (confirm('Вы уверены, что хотите удалить пользователя?')) {
-      setUsers(users.filter((u) => u.id !== id));
-      toast.success('Пользователь удалён (мок)');
+  const handleDeleteUser = async (id: number) => {
+    if (confirm("Вы уверены, что хотите удалить пользователя?")) {
+      setIsLoading(true);
+      try {
+        await UserService.deleteUser(id);
+        toast.success("Пользователь успешно удалён");
+        
+        // Перезагружаем список пользователей
+        await loadUsers();
+      } catch (error: any) {
+        console.error('Ошибка удаления пользователя:', error);
+        toast.error(error.response?.data?.message || "Ошибка удаления пользователя");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -179,10 +200,24 @@ export default function SettingsPage() {
     setEditingRole(user.role);
   };
 
-  const saveRoleChange = (id: number) => {
-    setUsers(users.map((u) => u.id === id ? { ...u, role: editingRole } : u));
-    setEditingUserId(null);
-    toast.success('Роль изменена (мок)');
+  const saveRoleChange = async (id: number) => {
+    setIsLoading(true);
+    try {
+      // Преобразуем роль обратно в формат API
+      const apiRole = editingRole.toUpperCase() as "USER" | "ADMIN";
+      
+      await UserService.updateUser(id, { role: apiRole });
+      toast.success("Роль успешно изменена");
+      
+      // Перезагружаем список пользователей
+      await loadUsers();
+      setEditingUserId(null);
+    } catch (error: any) {
+      console.error('Ошибка изменения роли:', error);
+      toast.error(error.response?.data?.message || "Ошибка изменения роли");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const cancelEditing = () => {
@@ -190,45 +225,53 @@ export default function SettingsPage() {
   };
 
   const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'admin': return 'Администратор';
-      case 'editor': return 'Редактор';
-      case 'moderator': return 'Модератор';
-      default: return 'Пользователь';
+    switch (role.toLowerCase()) {
+      case "admin":
+        return "Администратор";
+      case "user":
+        return "Пользователь";
+      default:
+        return "Пользователь";
     }
   };
 
   const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case 'admin': return 'bg-red-50 text-red-600 border-red-200';
-      case 'editor': return 'bg-blue-50 text-blue-600 border-blue-200';
-      case 'moderator': return 'bg-purple-50 text-purple-600 border-purple-200';
-      default: return 'bg-gray-50 text-gray-600 border-gray-200';
+    switch (role.toLowerCase()) {
+      case "admin":
+        return "bg-red-50 text-red-600 border-red-200";
+      case "user":
+        return "bg-blue-50 text-blue-600 border-blue-200";
+      default:
+        return "bg-gray-50 text-gray-600 border-gray-200";
     }
   };
 
   const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'admin': return Crown;
-      case 'editor': return Edit;
-      case 'moderator': return Shield;
-      default: return User;
+    switch (role.toLowerCase()) {
+      case "admin":
+        return Crown;
+      case "user":
+        return User;
+      default:
+        return User;
     }
   };
 
   const filteredUsers = users.filter((user) => {
-    const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    const matchesSearch =
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      `${user.firstName || ''} ${user.lastName || ''}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    const matchesRole = roleFilter === "all" || user.role === roleFilter;
     return matchesSearch && matchesRole;
   });
 
   const getUserStats = () => {
     const total = users.length;
-    const admins = users.filter(u => u.role === 'admin').length;
-    const editors = users.filter(u => u.role === 'editor').length;
-    const moderators = users.filter(u => u.role === 'moderator').length;
-    return { total, admins, editors, moderators };
+    const admins = users.filter((u) => u.role.toLowerCase() === "admin").length;
+    const regularUsers = users.filter((u) => u.role.toLowerCase() === "user").length;
+    return { total, admins, users: regularUsers };
   };
 
   const stats = getUserStats();
@@ -270,32 +313,39 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-3">
                   <AlertCircle className="w-5 h-5 text-yellow-600" />
                   <div>
-                    <p className="text-sm font-medium text-yellow-700">Текущий пароль</p>
-                    <p className="text-xs text-yellow-600">Рекомендуется менять пароль раз в 3 месяца</p>
+                    <p className="text-sm font-medium text-yellow-700">
+                      Текущий пароль
+                    </p>
+                    <p className="text-xs text-yellow-600">
+                      Рекомендуется менять пароль раз в 3 месяца
+                    </p>
                   </div>
-                  <div className="ml-auto text-sm font-mono text-yellow-700">••••••••</div>
+                  <div className="ml-auto text-sm font-mono text-yellow-700">
+                    ••••••••
+                  </div>
                 </div>
               </div>
 
-
-              <button
-                onClick={() => setIsChangingPassword(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-colors flex items-center gap-2 font-medium"
-              >
-                <Lock className="w-4 h-4" />
-                Изменить пароль
-              </button>
+<BlueButton onClick={() => setIsChangingPassword(true)} Icon={Lock}/>
+            
             </div>
           ) : (
             <form onSubmit={handlePasswordChange} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Текущий пароль *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Текущий пароль *
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type={showOldPassword ? "text" : "password"}
                     value={passwordForm.oldPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordForm({
+                        ...passwordForm,
+                        oldPassword: e.target.value,
+                      })
+                    }
                     className="w-full border border-gray-300 rounded-xl py-3 pl-10 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Введите текущий пароль"
                     required
@@ -305,20 +355,31 @@ export default function SettingsPage() {
                     onClick={() => setShowOldPassword(!showOldPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showOldPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showOldPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Новый пароль *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Новый пароль *
+                  </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type={showNewPassword ? "text" : "password"}
                       value={passwordForm.newPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                      onChange={(e) =>
+                        setPasswordForm({
+                          ...passwordForm,
+                          newPassword: e.target.value,
+                        })
+                      }
                       className="w-full border border-gray-300 rounded-xl py-3 pl-10 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Введите новый пароль"
                       required
@@ -328,29 +389,46 @@ export default function SettingsPage() {
                       onClick={() => setShowNewPassword(!showNewPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showNewPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Подтвердите пароль *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Подтвердите пароль *
+                  </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       value={passwordForm.confirmPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                      onChange={(e) =>
+                        setPasswordForm({
+                          ...passwordForm,
+                          confirmPassword: e.target.value,
+                        })
+                      }
                       className="w-full border border-gray-300 rounded-xl py-3 pl-10 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Повторите новый пароль"
                       required
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -363,16 +441,16 @@ export default function SettingsPage() {
                   className="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl transition-colors flex items-center gap-2 font-medium"
                 >
                   <Save className="w-4 h-4" />
-                  {isLoading ? 'Сохранение...' : 'Сохранить пароль'}
+                  {isLoading ? "Сохранение..." : "Сохранить пароль"}
                 </button>
                 <button
                   type="button"
                   onClick={() => {
                     setIsChangingPassword(false);
                     setPasswordForm({
-                      oldPassword: '',
-                      newPassword: '',
-                      confirmPassword: '',
+                      oldPassword: "",
+                      newPassword: "",
+                      confirmPassword: "",
                     });
                   }}
                   className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl transition-colors flex items-center gap-2 font-medium"
@@ -405,21 +483,22 @@ export default function SettingsPage() {
               </div>
             </div>
             <BlueButton
-  onClick={() => setIsCreatingUser(true)}
-  Icon={UserPlus}
-  text="Создать пользователя"
-/>
-
+              onClick={() => setIsCreatingUser(true)}
+              Icon={UserPlus}
+              text="Создать пользователя"
+            />
           </div>
 
           {/* Статистика пользователей */}
-          <div className="grid md:grid-cols-4 gap-4 mb-6">
+          <div className="grid md:grid-cols-3 gap-4 mb-6">
             <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
               <div className="flex items-center gap-3">
                 <Users className="w-5 h-5 text-blue-600" />
                 <div>
                   <p className="text-sm font-medium text-blue-700">Всего</p>
-                  <p className="text-lg font-bold text-gray-800">{stats.total}</p>
+                  <p className="text-lg font-bold text-gray-800">
+                    {stats.total}
+                  </p>
                 </div>
               </div>
             </div>
@@ -427,26 +506,23 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3">
                 <Crown className="w-5 h-5 text-red-600" />
                 <div>
-                  <p className="text-sm font-medium text-red-700">Администраторы</p>
-                  <p className="text-lg font-bold text-gray-800">{stats.admins}</p>
+                  <p className="text-sm font-medium text-red-700">
+                    Администраторы
+                  </p>
+                  <p className="text-lg font-bold text-gray-800">
+                    {stats.admins}
+                  </p>
                 </div>
               </div>
             </div>
-            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+            <div className="bg-green-50 p-4 rounded-xl border border-green-100">
               <div className="flex items-center gap-3">
-                <Edit className="w-5 h-5 text-blue-600" />
+                <User className="w-5 h-5 text-green-600" />
                 <div>
-                  <p className="text-sm font-medium text-blue-700">Редакторы</p>
-                  <p className="text-lg font-bold text-gray-800">{stats.editors}</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-xl border border-purple-100">
-              <div className="flex items-center gap-3">
-                <Shield className="w-5 h-5 text-purple-600" />
-                <div>
-                  <p className="text-sm font-medium text-purple-700">Модераторы</p>
-                  <p className="text-lg font-bold text-gray-800">{stats.moderators}</p>
+                  <p className="text-sm font-medium text-green-700">Пользователи</p>
+                  <p className="text-lg font-bold text-gray-800">
+                    {stats.users}
+                  </p>
                 </div>
               </div>
             </div>
@@ -464,19 +540,16 @@ export default function SettingsPage() {
                 className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            <div className="relative">
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <select
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-              >
-                <option value="all">Все роли</option>
-                <option value="admin">Администраторы</option>
-                <option value="editor">Редакторы</option>
-                <option value="moderator">Модераторы</option>
-              </select>
-            </div>
+            <Dropdown
+  options={[
+    { id: "all", name: "Все роли", leftElement: <Filter className="text-gray-400 w-5 h-5" /> },
+    { id: "admin", name: "Администраторы" },
+    { id: "user", name: "Пользователи" },
+  ]}
+  value={roleFilter}
+  onSelect={(id) => setRoleFilter(id.toString())}
+  placeholder="Все роли"
+/>
           </div>
 
           {/* Форма создания пользователя */}
@@ -489,13 +562,20 @@ export default function SettingsPage() {
               <form onSubmit={handleCreateUser} className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email *
+                    </label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
                         type="email"
                         value={newUserForm.email}
-                        onChange={(e) => setNewUserForm({ ...newUserForm, email: e.target.value })}
+                        onChange={(e) =>
+                          setNewUserForm({
+                            ...newUserForm,
+                            email: e.target.value,
+                          })
+                        }
                         className="w-full border border-gray-300 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="user@example.com"
                         required
@@ -503,13 +583,20 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Пароль *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Пароль *
+                    </label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
                         type="password"
                         value={newUserForm.password}
-                        onChange={(e) => setNewUserForm({ ...newUserForm, password: e.target.value })}
+                        onChange={(e) =>
+                          setNewUserForm({
+                            ...newUserForm,
+                            password: e.target.value,
+                          })
+                        }
                         className="w-full border border-gray-300 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Минимум 6 символов"
                         required
@@ -519,26 +606,40 @@ export default function SettingsPage() {
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Имя</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Имя
+                    </label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
                         type="text"
                         value={newUserForm.firstName}
-                        onChange={(e) => setNewUserForm({ ...newUserForm, firstName: e.target.value })}
+                        onChange={(e) =>
+                          setNewUserForm({
+                            ...newUserForm,
+                            firstName: e.target.value,
+                          })
+                        }
                         className="w-full border border-gray-300 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Введите имя"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Фамилия</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Фамилия
+                    </label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
                         type="text"
                         value={newUserForm.lastName}
-                        onChange={(e) => setNewUserForm({ ...newUserForm, lastName: e.target.value })}
+                        onChange={(e) =>
+                          setNewUserForm({
+                            ...newUserForm,
+                            lastName: e.target.value,
+                          })
+                        }
                         className="w-full border border-gray-300 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Введите фамилию"
                       />
@@ -546,22 +647,29 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Роль *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Роль *
+                  </label>
                   <div className="relative">
                     <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <select
                       value={newUserForm.role}
-                      onChange={(e) => setNewUserForm({ ...newUserForm, role: e.target.value })}
+                      onChange={(e) =>
+                        setNewUserForm({ ...newUserForm, role: e.target.value as "USER" | "ADMIN" })
+                      }
                       className="w-full border border-gray-300 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
                     >
-                      <option value="admin">Администратор</option>
-                      <option value="editor">Редактор</option>
-                      <option value="moderator">Модератор</option>
+                      <option value="USER">Пользователь</option>
+                      <option value="ADMIN">Администратор</option>
                     </select>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <GreenButton type='submit' text='Создать пользователя' Icon={Save} />
+                  <GreenButton
+                    type="submit"
+                    text={isLoading ? "Создание..." : "Создать пользователя"}
+                    Icon={Save}
+                  />
                   <button
                     type="button"
                     onClick={() => setIsCreatingUser(false)}
@@ -577,12 +685,15 @@ export default function SettingsPage() {
 
           {/* Список пользователей в виде карточек */}
           <div className="space-y-4">
-            {filteredUsers.length === 0 ? (
+            {isUsersLoading ? (
               <div className="text-center text-gray-500 text-sm bg-gray-50 border border-gray-100 rounded-xl p-8">
-                {searchTerm || roleFilter !== 'all' 
+                Загрузка пользователей...
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="text-center text-gray-500 text-sm bg-gray-50 border border-gray-100 rounded-xl p-8">
+                {searchTerm || roleFilter !== "all"
                   ? "Пользователи не найдены по заданным критериям."
-                  : "Пользователи не найдены."
-                }
+                  : "Пользователи не найдены."}
               </div>
             ) : (
               filteredUsers.map((u) => {
@@ -603,25 +714,26 @@ export default function SettingsPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-1">
                             <h3 className="font-semibold text-gray-800">
-                              {u.firstName && u.lastName 
-                                ? `${u.firstName} ${u.lastName}` 
-                                : u.firstName || u.lastName || 'Без имени'
-                              }
+                              {u.firstName && u.lastName
+                                ? `${u.firstName} ${u.lastName}`
+                                : u.firstName || u.lastName || "Без имени"}
                             </h3>
                             {editingUserId === u.id ? (
                               <div className="flex items-center gap-2">
                                 <select
                                   value={editingRole}
-                                  onChange={(e) => setEditingRole(e.target.value)}
+                                  onChange={(e) =>
+                                    setEditingRole(e.target.value)
+                                  }
                                   className="border border-gray-300 rounded-lg py-1 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                   <option value="admin">Администратор</option>
-                                  <option value="editor">Редактор</option>
-                                  <option value="moderator">Модератор</option>
+                                  <option value="user">Пользователь</option>
                                 </select>
                                 <button
                                   onClick={() => saveRoleChange(u.id)}
-                                  className="text-green-600 hover:text-green-700 p-1"
+                                  disabled={isLoading}
+                                  className="text-green-600 hover:text-green-700 p-1 disabled:opacity-50"
                                   title="Сохранить"
                                 >
                                   <Save className="w-4 h-4" />
@@ -635,7 +747,11 @@ export default function SettingsPage() {
                                 </button>
                               </div>
                             ) : (
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${getRoleBadgeColor(u.role)}`}>
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${getRoleBadgeColor(
+                                  u.role
+                                )}`}
+                              >
                                 <RoleIcon className="w-3 h-3" />
                                 {getRoleLabel(u.role)}
                               </span>
@@ -649,11 +765,14 @@ export default function SettingsPage() {
                             <div className="flex items-center gap-1">
                               <Calendar className="w-4 h-4" />
                               <span>
-                                {new Date(u.createdAt).toLocaleDateString('ru-RU', {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric'
-                                })}
+                                {new Date(u.createdAt).toLocaleDateString(
+                                  "ru-RU",
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  }
+                                )}
                               </span>
                             </div>
                             <div className="flex items-center gap-1">
@@ -673,22 +792,27 @@ export default function SettingsPage() {
                             Текущий
                           </div>
                         )}
-                        <button
-                          onClick={() => startEditingRole(u)}
-                          className="w-10 h-10 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center transition-colors"
-                          title="Изменить роль"
-                          disabled={editingUserId !== null}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
+                     <button
+  onClick={() => startEditingRole(u)}
+  disabled={
+    Number(u.id) === Number(user?.id) || editingUserId !== null || isLoading
+  }
+  className={`w-10 h-10 flex items-center justify-center rounded-xl transition-colors
+    ${
+      Number(u.id) === Number(user?.id) || editingUserId !== null || isLoading
+        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+        : "cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-600"
+    }`}
+  title="Изменить роль"
+>
+  <Edit className="w-4 h-4" />
+</button>
+
+                        <DeleteButton
                           onClick={() => handleDeleteUser(u.id)}
-                          className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"
                           title="Удалить пользователя"
-                          disabled={u.id === user?.id} // Нельзя удалить себя
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                          disabled={u.id === user?.id || isLoading} // нельзя удалить себя
+                        />
                       </div>
                     </div>
 
@@ -697,7 +821,10 @@ export default function SettingsPage() {
                       <div className="mt-3 pt-3 border-t border-gray-200">
                         <div className="flex items-center gap-2 text-xs text-blue-600">
                           <UserCheck className="w-3 h-3" />
-                          <span>Это ваш аккаунт. Вы не можете изменить свою роль или удалить себя.</span>
+                          <span>
+                            Это ваш аккаунт. Вы не можете изменить свою роль или
+                            удалить себя.
+                          </span>
                         </div>
                       </div>
                     )}
@@ -712,13 +839,14 @@ export default function SettingsPage() {
             <div className="mt-6 pt-4 border-t border-gray-100">
               <div className="flex items-center justify-between text-sm text-gray-500">
                 <span>
-                  Показано {filteredUsers.length} из {users.length} пользователей
+                  Показано {filteredUsers.length} из {users.length}{" "}
+                  пользователей
                 </span>
-                {(searchTerm || roleFilter !== 'all') && (
+                {(searchTerm || roleFilter !== "all") && (
                   <button
                     onClick={() => {
-                      setSearchTerm('');
-                      setRoleFilter('all');
+                      setSearchTerm("");
+                      setRoleFilter("all");
                     }}
                     className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
                   >

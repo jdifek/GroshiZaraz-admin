@@ -8,6 +8,7 @@ import { Category } from "../services/categories/categoriesTypes";
 import CategoryService from "../services/categories/categoriesService";
 import { OrangeButton } from "../ui/Buttons/OrangeButton";
 import { EditButton } from "../ui/Buttons/EditButton";
+import { DeleteButton } from "../ui/Buttons/DeleteButton";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -167,12 +168,8 @@ export default function CategoriesPage() {
                   item={category}
                   handleClick={(category) => openModal("edit", category)}
                 />
-                <button
-                  onClick={() => handleDelete(category.id)}
-                  className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                                 <DeleteButton onClick={() => handleDelete(category.id)} />
+
               </div>
             </div>
           ))

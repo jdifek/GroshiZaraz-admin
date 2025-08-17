@@ -33,6 +33,7 @@ import { toast } from "react-toastify";
 import { GreenButton } from "../ui/Buttons/GreenButton";
 import { ExpandCollapseButton } from "../ui/Buttons/ExpandCollapseButton";
 import { EditButton } from "../ui/Buttons/EditButton";
+import { DeleteButton } from "../ui/Buttons/DeleteButton";
 
 export default function NewsPage() {
   const [news, setNews] = useState<News[]>([]);
@@ -483,13 +484,8 @@ export default function NewsPage() {
                         item={article}
                         handleClick={(article) => openModal("edit", article)}
                       />
-                      <button
-                        onClick={() => handleDelete(article.id)}
-                        className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"
-                        title="Удалить"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                                                     <DeleteButton onClick={() => handleDelete(article.id)} />
+
                     </div>
                   </div>
                 </div>

@@ -16,6 +16,7 @@ import MfoSatelliteKeyService from "../services/MfoSatelliteKey/MfoSatelliteKeyS
 import { BlueButton } from "../ui/Buttons/BlueButton";
 import { MfoSatelliteKey } from "../services/MfoSatelliteKey/mfoSatelliteKeyTypes";
 import { EditButton } from "../ui/Buttons/EditButton";
+import { DeleteButton } from "../ui/Buttons/DeleteButton";
 
 const SatelliteKeyModal = ({ isOpen, onClose, mode }: any) => {
   if (!isOpen) return null;
@@ -366,13 +367,11 @@ export default function SatelliteKeysPage() {
                       item={key}
                       handleClick={(key) => openModal("edit", key)}
                     />
-                    <button
-                      onClick={() => deleteKey(key.id)}
-                      className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"
-                      title="Удалить"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <DeleteButton
+  onClick={() => deleteKey(key.id)} 
+  title="Удалить" 
+/>
+
                   </div>
                 </div>
               </div>

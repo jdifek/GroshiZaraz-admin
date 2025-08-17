@@ -21,6 +21,7 @@ import { BlueButton } from "../ui/Buttons/BlueButton";
 import { MfoSatellite } from "../services/MfoSatellite/mfoSatelliteTypes";
 import { ExpandCollapseButton } from "../ui/Buttons/ExpandCollapseButton";
 import { EditButton } from "../ui/Buttons/EditButton";
+import { DeleteButton } from "../ui/Buttons/DeleteButton";
 
 // Типы данных на основе вашего JSON
 
@@ -462,13 +463,11 @@ export default function SatellitesPage() {
                           openModal("edit", satellite)
                         }
                       />
-                      <button
-                        onClick={() => deleteSatellite(satellite.id)}
-                        className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"
-                        title="Удалить"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                     <DeleteButton
+  onClick={() => deleteSatellite(satellite.id)}
+  title="Удалить"
+/>
+
                     </div>
                   </div>
                 </div>

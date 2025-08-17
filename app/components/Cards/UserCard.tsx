@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { DeleteButton } from "@/app/ui/Buttons/DeleteButton";
 import { EditButton } from "@/app/ui/Buttons/EditButton";
 import {
   Mail,
@@ -137,14 +138,12 @@ export const UserCard: React.FC<UserCardProps> = ({
             title="Изменить роль"
             disabled={editingUserId !== null}
           />
-          <button
-            onClick={() => handleDeleteUser(user.id)}
-            className="w-10 h-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition-colors"
-            title="Удалить пользователя"
-            disabled={user.id === currentUserId} // Нельзя удалить себя
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+        <DeleteButton
+  onClick={() => handleDeleteUser(user.id)} 
+  disabled={user.id === currentUserId} 
+  title="Удалить пользователя" 
+/>
+
         </div>
       </div>
 

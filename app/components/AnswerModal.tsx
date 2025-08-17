@@ -128,7 +128,7 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 overflow-y-auto max-h-[90vh]">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 scrollbar-none overflow-y-auto max-h-[90vh]">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-800">
             Добавить ответ на вопрос
