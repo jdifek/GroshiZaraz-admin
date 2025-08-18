@@ -74,7 +74,7 @@ export default function EditAnswerModal({ isOpen, onClose, onSave, answer }: Edi
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] scrollbar-none overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-50 rounded-lg">
@@ -164,7 +164,7 @@ export default function EditAnswerModal({ isOpen, onClose, onSave, answer }: Edi
                 rows={3}
                 value={formData.textUk || ''}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full scrollbar-none px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Украинский перевод"
               />
             </div>
@@ -177,7 +177,7 @@ export default function EditAnswerModal({ isOpen, onClose, onSave, answer }: Edi
                 rows={3}
                 value={formData.textRu || ''}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full scrollbar-none px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Русский перевод"
               />
             </div>

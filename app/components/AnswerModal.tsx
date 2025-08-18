@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState, useEffect } from 'react';
-import { User, Star, X } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { User, Star, X } from "lucide-react";
+import { CloseButton } from "../ui/Buttons/CloseButton";
 
 interface Expert {
   id: number;
@@ -21,16 +22,20 @@ interface AnswerModalProps {
   questionId: number;
 }
 
-export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProps) {
+export default function AnswerModal({
+  isOpen,
+  onClose,
+  onSave,
+}: AnswerModalProps) {
   const [formData, setFormData] = useState({
-    textOriginal: '',
-    textUk: '',
-    textRu: '',
-    authorName: '',
-    authorEmail: '',
-    expertId: '',
+    textOriginal: "",
+    textUk: "",
+    textRu: "",
+    authorName: "",
+    authorEmail: "",
+    expertId: "",
     isModerated: false,
-    answerType: 'user' // 'user' или 'expert'
+    answerType: "user", // 'user' или 'expert'
   });
 
   const [experts, setExperts] = useState<Expert[]>([]);
@@ -46,46 +51,50 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
   const fetchExperts = async () => {
     setLoadingExperts(true);
     try {
-      const response = await fetch('/api/experts');
+      const response = await fetch("/api/experts");
       const data = await response.json();
       setExperts(data);
     } catch (error) {
-      console.error('Ошибка при загрузке экспертов:', error);
+      console.error("Ошибка при загрузке экспертов:", error);
     } finally {
       setLoadingExperts(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
 
     // Если выбрали тип ответа "эксперт", очищаем поля пользователя
-    if (name === 'answerType' && value === 'expert') {
-      setFormData(prev => ({
+    if (name === "answerType" && value === "expert") {
+      setFormData((prev) => ({
         ...prev,
-        authorName: '',
-        authorEmail: ''
+        authorName: "",
+        authorEmail: "",
       }));
     }
 
     // Если выбрали тип ответа "пользователь", очищаем expertId
-    if (name === 'answerType' && value === 'user') {
-      setFormData(prev => ({
+    if (name === "answerType" && value === "user") {
+      setFormData((prev) => ({
         ...prev,
-        expertId: ''
+        expertId: "",
       }));
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const submitData = {
       textOriginal: formData.textOriginal,
       textUk: formData.textUk || null,
@@ -93,7 +102,7 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
       isModerated: formData.isModerated,
     };
 
-    if (formData.answerType === 'expert' && formData.expertId) {
+    if (formData.answerType === "expert" && formData.expertId) {
       submitData.expertId = parseInt(formData.expertId);
     } else {
       submitData.authorName = formData.authorName;
@@ -106,14 +115,14 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
 
   const handleReset = () => {
     setFormData({
-      textOriginal: '',
-      textUk: '',
-      textRu: '',
-      authorName: '',
-      authorEmail: '',
-      expertId: '',
+      textOriginal: "",
+      textUk: "",
+      textRu: "",
+      authorName: "",
+      authorEmail: "",
+      expertId: "",
       isModerated: false,
-      answerType: 'user'
+      answerType: "user",
     });
   };
 
@@ -124,7 +133,9 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
 
   if (!isOpen) return null;
 
-  const selectedExpert = experts.find(e => e.id === parseInt(formData.expertId));
+  const selectedExpert = experts.find(
+    (e) => e.id === parseInt(formData.expertId)
+  );
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -153,7 +164,7 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
                   type="radio"
                   name="answerType"
                   value="user"
-                  checked={formData.answerType === 'user'}
+                  checked={formData.answerType === "user"}
                   onChange={handleChange}
                   className="text-blue-600"
                 />
@@ -165,7 +176,7 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
                   type="radio"
                   name="answerType"
                   value="expert"
-                  checked={formData.answerType === 'expert'}
+                  checked={formData.answerType === "expert"}
                   onChange={handleChange}
                   className="text-blue-600"
                 />
@@ -176,7 +187,7 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
           </div>
 
           {/* Поля для пользователя */}
-          {formData.answerType === 'user' && (
+          {formData.answerType === "user" && (
             <div className="grid md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -208,7 +219,7 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
           )}
 
           {/* Выбор эксперта */}
-          {formData.answerType === 'expert' && (
+          {formData.answerType === "expert" && (
             <div className="space-y-3">
               <label className="block text-sm font-medium text-gray-700">
                 Выберите эксперта *
@@ -226,9 +237,10 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Выберите эксперта</option>
-                  {experts.map(expert => (
+                  {experts.map((expert) => (
                     <option key={expert.id} value={expert.id}>
-                      {expert.name} - {expert.position} ({expert.totalAnswers} ответов)
+                      {expert.name} - {expert.position} ({expert.totalAnswers}{" "}
+                      ответов)
                     </option>
                   ))}
                 </select>
@@ -253,20 +265,23 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
                         {selectedExpert.position}
                       </p>
                       <p className="text-xs text-blue-600">
-                        Опыт: {selectedExpert.experience} • Ответов: {selectedExpert.totalAnswers}
+                        Опыт: {selectedExpert.experience} • Ответов:{" "}
+                        {selectedExpert.totalAnswers}
                       </p>
                     </div>
                   </div>
                   {selectedExpert.expertise?.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-1">
-                      {selectedExpert.expertise.slice(0, 3).map((skill, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
-                        >
-                          {skill}
-                        </span>
-                      ))}
+                      {selectedExpert.expertise
+                        .slice(0, 3)
+                        .map((skill, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
+                          >
+                            {skill}
+                          </span>
+                        ))}
                       {selectedExpert.expertise.length > 3 && (
                         <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
                           +{selectedExpert.expertise.length - 3}
@@ -342,13 +357,7 @@ export default function AnswerModal({ isOpen, onClose, onSave }: AnswerModalProp
 
           {/* Кнопки */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-            >
-              Отмена
-            </button>
+            <CloseButton handleClose={handleClose} />
             <button
               type="submit"
               className="px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"

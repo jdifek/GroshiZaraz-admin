@@ -17,29 +17,8 @@ import { BlueButton } from "../ui/Buttons/BlueButton";
 import { MfoSatelliteKey } from "../services/MfoSatelliteKey/mfoSatelliteKeyTypes";
 import { EditButton } from "../ui/Buttons/EditButton";
 import { DeleteButton } from "../ui/Buttons/DeleteButton";
+import SatelliteKeyModal from "../components/SatelliteKeyModal";
 
-const SatelliteKeyModal = ({ isOpen, onClose, mode }: any) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-2xl max-w-md w-full mx-4">
-        <h3 className="text-xl font-semibold mb-4">
-          {mode === "create" ? "Создать ключ" : "Редактировать ключ"}
-        </h3>
-        <p className="text-gray-600 mb-4">Форма для работы с ключами...</p>
-        <div className="flex gap-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            Закрыть
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function SatelliteKeysPage() {
   const [keys, setKeys] = useState<MfoSatelliteKey[]>([]);
@@ -385,7 +364,7 @@ export default function SatelliteKeysPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         mode={modalMode}
-        keyData={selectedKey || undefined}
+        satelliteKey={selectedKey}
         onSubmitSuccess={fetchKeys}
       />
     </div>

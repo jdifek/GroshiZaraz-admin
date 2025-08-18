@@ -44,7 +44,7 @@ export const Dropdown = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-black border border-gray-300 rounded-xl px-4 py-2 text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full text-black border cursor-pointer  border-gray-300 rounded-xl px-4 py-2 text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <div className="flex items-center gap-2">
           {selectedOption?.leftElement}
@@ -62,7 +62,7 @@ export const Dropdown = ({
         </svg>
       </button>
       {isOpen && (
-  <ul className="absolute z-10 mt-1 w-full text-black bg-white border border-gray-300 rounded-xl max-h-48 overflow-auto shadow-lg">
+  <ul className="absolute z-10 mt-1 w-full text-black bg-white border border-gray-300 rounded-xl max-h-48 overflow-auto  scrollbar-none  shadow-lg">
     {options.map((option) => {
       const isActive = value?.toString() === option.id.toString();
       return (

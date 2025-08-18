@@ -41,8 +41,6 @@ export default function NewsModal({
     createdAt: "", // или Date, если хочешь
   });
 
-
-
   useEffect(() => {
     if (newsItem && mode === "edit") {
       setFormData({
@@ -76,8 +74,6 @@ export default function NewsModal({
       });
     }
   }, [newsItem, mode]);
-
-
 
   if (!isOpen) return null;
 
@@ -124,7 +120,7 @@ export default function NewsModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     const payload = {
       ...formData,
       authorId: Number(formData.authorId),
@@ -132,7 +128,7 @@ export default function NewsModal({
       views: Number(formData.views),
       readingMinutes: Number(formData.readingMinutes),
     };
-  
+
     try {
       if (mode === "edit" && newsItem?.id) {
         await NewsService.updateNews(newsItem.id, payload);
@@ -141,7 +137,7 @@ export default function NewsModal({
         await NewsService.createNews(payload);
         toast.success("Новость успешно создана");
       }
-  
+
       onSubmitSuccess();
       onClose();
     } catch (err) {
@@ -253,6 +249,24 @@ export default function NewsModal({
               Опубликовано
             </label>
           </div>
+           {/* Кастомный дропдаун для выбора автора */}
+           <Dropdown
+            label="Автор"
+            options={authors.map((a) => ({ id: a.id, name: a.name }))}
+            value={formData.authorId}
+            onSelect={(id) => selectAuthor(id.toString())}
+          />
+
+          <Dropdown
+            label="Категория"
+            options={categories.map((c) => ({
+              id: c.id,
+              name: c.name,
+              icon: c.icon,
+            }))}
+            value={formData.newsCategoryId}
+            onSelect={(id) => selectCategory(id.toString())}
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -280,20 +294,7 @@ export default function NewsModal({
             />
           </div>
 
-          {/* Кастомный дропдаун для выбора автора */}
-          <Dropdown
-  label="Автор"
-  options={authors.map(a => ({ id: a.id, name: a.name }))}
-  value={formData.authorId}
-  onSelect={(id) => selectAuthor(id.toString())}
-/>
-
-<Dropdown
-  label="Категория"
-  options={categories.map(c => ({ id: c.id, name: c.name, icon: c.icon }))}
-  value={formData.newsCategoryId}
-  onSelect={(id) => selectCategory(id.toString())}
-/>
+         
 
           <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
             <button

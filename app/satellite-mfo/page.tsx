@@ -5,7 +5,6 @@
 import { useEffect, useState } from "react";
 import {
   Search,
-  Trash2,
   Satellite,
   Globe,
   FileText,
@@ -22,31 +21,11 @@ import { MfoSatellite } from "../services/MfoSatellite/mfoSatelliteTypes";
 import { ExpandCollapseButton } from "../ui/Buttons/ExpandCollapseButton";
 import { EditButton } from "../ui/Buttons/EditButton";
 import { DeleteButton } from "../ui/Buttons/DeleteButton";
+import SatelliteModal from "../components/SatelliteModal";
 
 // Типы данных на основе вашего JSON
 
-const SatelliteModal = ({ isOpen, onClose, mode }: any) => {
-  if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-2xl max-w-md w-full mx-4">
-        <h3 className="text-xl font-semibold mb-4">
-          {mode === "create" ? "Создать сателлит" : "Редактировать сателлит"}
-        </h3>
-        <p className="text-gray-600 mb-4">Форма для работы с сателлитами...</p>
-        <div className="flex gap-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            Закрыть
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function SatellitesPage() {
   const [satellites, setSatellites] = useState<MfoSatellite[]>([]);
@@ -482,7 +461,7 @@ export default function SatellitesPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         mode={modalMode}
-        satelliteData={selectedSatellite || undefined}
+        satellite={selectedSatellite || undefined}
         onSubmitSuccess={fetchSatellites}
       />
     </div>

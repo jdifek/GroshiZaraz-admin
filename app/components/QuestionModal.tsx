@@ -59,7 +59,7 @@ export default function QuestionModal({ isOpen, onClose, onSave, mode, question 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-xl mx-4 overflow-y-auto max-h-[90vh]">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-xl mx-4 overflow-y-auto scrollbar-none max-h-[90vh]">
         <h2 className="text-xl font-bold text-gray-800 mb-4">
           {mode === 'create' ? 'Создать вопрос' : 'Редактировать вопрос'}
         </h2>
