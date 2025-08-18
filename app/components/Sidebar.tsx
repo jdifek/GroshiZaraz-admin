@@ -15,6 +15,7 @@ import {
   Shield,
   SatelliteDish,
   ChevronLeft,
+  UserCheck,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
@@ -70,6 +71,11 @@ const menuItems = [
       { href: "/questionAnswers", label: "Ответы" },
       { href: "/questionAnswers-mfo", label: "Ответы МФО" },
     ],
+  },
+  {
+    href: "/expert",
+    icon: UserCheck, // или другой подходящий икон, например User or Users
+    label: "Эксперты",
   },
   {
     href: "/settings",
