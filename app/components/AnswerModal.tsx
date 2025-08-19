@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { User, Star, X } from "lucide-react";
 import { CloseButton } from "../ui/Buttons/CloseButton";
+import { DropdownWithSearchAva } from "../ui/Dropdowns/DropdownWithSearchAva";
+import ExpertsService from "../services/experts/expertsService";
 
 interface Expert {
   id: number;
@@ -224,27 +226,36 @@ export default function AnswerModal({
               <label className="block text-sm font-medium text-gray-700">
                 Выберите эксперта *
               </label>
-              {loadingExperts ? (
-                <div className="p-4 bg-gray-50 rounded-lg text-center text-gray-500">
-                  Загрузка экспертов...
-                </div>
-              ) : (
-                <select
-                  name="expertId"
-                  value={formData.expertId}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Выберите эксперта</option>
-                  {experts.map((expert) => (
-                    <option key={expert.id} value={expert.id}>
-                      {expert.name} - {expert.position} ({expert.totalAnswers}{" "}
-                      ответов)
-                    </option>
-                  ))}
-                </select>
-              )}
+
+              <DropdownWithSearchAva
+                value={formData.expertId}
+                placeholder="Выберите эксперта"
+                onSelect={(id) =>
+                  setFormData((prev) => ({ ...prev, expertId: id }))
+                }
+                onSearch={async (query) => {
+                  // запрос на сервер
+                  const experts = await ExpertsService.getShortExperts(query);
+                  // преобразуем под формат дропдауна
+                  return experts.map((e) => ({
+                    id: e.id,
+                    name: `${e.name} - ${e.position} (${e.totalAnswers} ответов)`,
+                    avatar: e.avatar,
+                  }));
+                }}
+                onLoadOption={async (id) => {
+                  // загрузка конкретного эксперта (если нужно показать выбранного при редактировании формы)
+                  const experts = await ExpertsService.getShortExperts();
+                  const found = experts.find((e) => e.id === id);
+                  return found
+                    ? {
+                        id: found.id,
+                        name: `${found.name} - ${found.position} (${found.totalAnswers} ответов)`,
+                        avatar: found.avatar,
+                      }
+                    : null;
+                }}
+              />
 
               {/* Предпросмотр выбранного эксперта */}
               {selectedExpert && (
@@ -293,7 +304,6 @@ export default function AnswerModal({
               )}
             </div>
           )}
-
           {/* Текст ответа */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

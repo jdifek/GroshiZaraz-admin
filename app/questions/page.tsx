@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -96,23 +95,28 @@ export default function QuestionsPage() {
 
   const handleSaveAnswer = async (data: any) => {
     if (!selectedQuestionId) return;
-
+  
     try {
+      const payload = {
+        questionId: selectedQuestionId,
+        ...data, // просто берём всё, что вернула модалка
+      };
+  
       const response = await fetch(
-        `/api/questions/${selectedQuestionId}/answers`,
+        `http://localhost:5000/api/question-answers`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(payload),
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Ошибка при сохранении ответа");
       }
-
+  
       setIsAnswerModalOpen(false);
       setSelectedQuestionId(null);
       fetchQuestions();
@@ -121,7 +125,8 @@ export default function QuestionsPage() {
       toast.error("Ошибка при добавлении ответа");
     }
   };
-
+  
+  
   // Функции для редактирования ответов
   const openEditAnswerModal = (answer: any) => {
     setSelectedAnswer(answer);
@@ -131,8 +136,7 @@ export default function QuestionsPage() {
   const handleSaveEditAnswer = async (answerId: number, data: any) => {
     try {
       const response = await fetch(
-        `
-http://localhost:5000/api/question-answers/${answerId}`,
+        `http://localhost:5000/api/question-answers/${answerId}`,
         {
           method: "PUT",
           headers: {
@@ -152,6 +156,32 @@ http://localhost:5000/api/question-answers/${answerId}`,
       toast.success("Ответ успешно обновлён");
     } catch (error) {
       toast.error("Ошибка при обновлении ответа");
+    }
+  };
+
+  // Функция для удаления ответа
+  const handleDeleteAnswer = async (answerId: number) => {
+    if (!confirm("Удалить ответ?")) return;
+    
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/question-answers/${answerId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Ошибка при удалении ответа");
+      }
+
+      fetchQuestions();
+      toast.success("Ответ успешно удалён");
+    } catch (error) {
+      toast.error("Ошибка при удалении ответа");
     }
   };
 
@@ -229,6 +259,7 @@ http://localhost:5000/api/question-answers/${answerId}`,
               onDelete={handleDelete}
               onAddAnswer={openAnswerModal}
               onEditAnswer={openEditAnswerModal}
+              onDeleteAnswer={handleDeleteAnswer}
             />
           ))
         )}

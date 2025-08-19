@@ -1,6 +1,4 @@
-import MfoSatelliteKeyService from "@/app/services/MfoSatelliteKey/MfoSatelliteKeyService";
 import { useState, useRef, useEffect, ReactNode } from "react";
-
 
 type SearchOption = {
   id: string | number;
@@ -15,8 +13,9 @@ type DropdownWithSearchProps = {
   onSelect: (id: string | number) => void;
   placeholder?: string;
   searchPlaceholder?: string;
-  language?: 'uk' | 'ru';
   initialOptions?: SearchOption[];
+  onSearch: (query: string) => Promise<SearchOption[]>;   // 🔑 теперь передаём снаружи
+  onLoadOption?: (id: string | number) => Promise<SearchOption | null>; // 🔑 опционально
 };
 
 export const DropdownWithSearch = ({
@@ -25,8 +24,9 @@ export const DropdownWithSearch = ({
   onSelect,
   placeholder,
   searchPlaceholder = "Поиск...",
-  language = 'ru',
-  initialOptions = []
+  initialOptions = [],
+  onSearch,
+  onLoadOption,
 }: DropdownWithSearchProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,72 +37,43 @@ export const DropdownWithSearch = ({
   const ref = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Загрузка выбранной опции при изменении value
+  // загрузка выбранного значения по id
   useEffect(() => {
-    if (value && !selectedOption) {
-      loadSelectedOption(value);
+    if (value && !selectedOption && onLoadOption) {
+      onLoadOption(value).then(opt => opt && setSelectedOption(opt));
     }
-  }, [value]);
+  }, [value, onLoadOption]);
 
-  const loadSelectedOption = async (id: string | number) => {
-    try {
-      const data = await MfoSatelliteKeyService.getSatelliteKey(Number(id));
-      const option: SearchOption = {
-        id: data.id,
-        name: language === 'uk' ? data.keyUk : data.keyRu
-      };
-      setSelectedOption(option);
-    } catch (error) {
-      console.error('Ошибка при загрузке выбранной опции:', error);
-    }
-  };
-
-  // Поиск опций через реальный сервис
-  const searchOptions = async (query: string) => {
-    if (!query.trim()) {
-      setOptions(initialOptions);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const results = await MfoSatelliteKeyService.searchSatelliteKeys(query);
-      const searchOptions: SearchOption[] = results.map(item => ({
-        id: item.id,
-        name: language === 'uk' ? item.keyUk : item.keyRu
-      }));
-      setOptions(searchOptions);
-    } catch (error) {
-      console.error('Ошибка при поиске:', error);
-      setOptions([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Дебаунс для поиска
+  // поиск опций (через функцию из props)
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      searchOptions(searchQuery);
+    if (!isOpen) return;
+    const timeoutId = setTimeout(async () => {
+      setIsLoading(true);
+      try {
+        const results = await onSearch(searchQuery);
+        setOptions(results);
+      } catch {
+        setOptions([]);
+      } finally {
+        setIsLoading(false);
+      }
     }, 300);
-
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, language]);
+  }, [searchQuery, isOpen, onSearch]);
 
-  // Клик вне компонента
-  const handleClickOutside = (event: MouseEvent) => {
-    if (ref.current && !ref.current.contains(event.target as Node)) {
-      setIsOpen(false);
-      setSearchQuery("");
-    }
-  };
-
+  // закрытие при клике вне
   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setSearchQuery("");
+      }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Фокус на поле поиска при открытии
+  // автофокус поиска при открытии
   useEffect(() => {
     if (isOpen && searchInputRef.current) {
       searchInputRef.current.focus();
@@ -126,7 +97,7 @@ export const DropdownWithSearch = ({
           {label}
         </label>
       )}
-      
+
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -160,15 +131,6 @@ export const DropdownWithSearch = ({
                 placeholder={searchPlaceholder}
                 className="w-full text-black bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
               />
-              <svg
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
               {isLoading && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                   <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -178,14 +140,9 @@ export const DropdownWithSearch = ({
           </div>
 
           <ul className="max-h-48 overflow-auto">
-            {options.length === 0 && !isLoading && searchQuery && (
+            {options.length === 0 && !isLoading && (
               <li className="px-4 py-3 text-gray-500 text-center">
-                Ничего не найдено
-              </li>
-            )}
-            {options.length === 0 && !searchQuery && (
-              <li className="px-4 py-3 text-gray-500 text-center">
-                Начните вводить для поиска
+                {searchQuery ? "Ничего не найдено" : "Начните вводить для поиска"}
               </li>
             )}
             {options.map((option) => {

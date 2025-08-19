@@ -27,3 +27,9 @@ export interface Expert {
 }
 
 export type ExpertPayload = Omit<Expert, "id" | "createdAt" | "updatedAt" | "totalAnswers">;
+export interface ExpertShort {
+  id: number;
+  name: string;
+  slug: string;
+  avatar?: string; // если хочешь в short тоже возвращать
+}

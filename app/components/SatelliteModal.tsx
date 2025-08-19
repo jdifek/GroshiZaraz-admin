@@ -1,66 +1,75 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client'
-import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
-import { toast } from 'react-toastify';
-import { DropdownWithSearch } from '../ui/Dropdowns/DropdownWithSearch';
+"use client";
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import { toast } from "react-toastify";
+import { DropdownWithSearch } from "../ui/Dropdowns/DropdownWithSearch";
+import MfoSatelliteKeyService from "../services/MfoSatelliteKey/MfoSatelliteKeyService";
 
 interface SatelliteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   satellite?: any;
   onSubmitSuccess: () => void;
 }
 
-export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSubmitSuccess }: SatelliteModalProps) {
+export default function SatelliteModal({
+  isOpen,
+  onClose,
+  mode,
+  satellite,
+  onSubmitSuccess,
+}: SatelliteModalProps) {
   const [formData, setFormData] = useState({
-    keyId: satellite?.keyId || '',
-    metaTitleUk: satellite?.metaTitleUk || '',
-    metaTitleRu: satellite?.metaTitleRu || '',
-    metaDescUk: satellite?.metaDescUk || '',
-    metaDescRu: satellite?.metaDescRu || '',
-    titleUk: satellite?.titleUk || '',
-    titleRu: satellite?.titleRu || '',
-    descriptionUk: satellite?.descriptionUk || '',
-    descriptionRu: satellite?.descriptionRu || '',
-    slugUk: satellite?.slugUk || '',
-    slugRu: satellite?.slugRu || '',
+    keyId: satellite?.keyId || "",
+    metaTitleUk: satellite?.metaTitleUk || "",
+    metaTitleRu: satellite?.metaTitleRu || "",
+    metaDescUk: satellite?.metaDescUk || "",
+    metaDescRu: satellite?.metaDescRu || "",
+    titleUk: satellite?.titleUk || "",
+    titleRu: satellite?.titleRu || "",
+    descriptionUk: satellite?.descriptionUk || "",
+    descriptionRu: satellite?.descriptionRu || "",
+    slugUk: satellite?.slugUk || "",
+    slugRu: satellite?.slugRu || "",
   });
 
   useEffect(() => {
-    if (mode === 'edit' && satellite) {
+    if (mode === "edit" && satellite) {
       setFormData({
-        keyId: satellite.keyId || '',
-        metaTitleUk: satellite.metaTitleUk || '',
-        metaTitleRu: satellite.metaTitleRu || '',
-        metaDescUk: satellite.metaDescUk || '',
-        metaDescRu: satellite.metaDescRu || '',
-        titleUk: satellite.titleUk || '',
-        titleRu: satellite.titleRu || '',
-        descriptionUk: satellite.descriptionUk || '',
-        descriptionRu: satellite.descriptionRu || '',
-        slugUk: satellite.slugUk || '',
-        slugRu: satellite.slugRu || '',
+        keyId: satellite.keyId || "",
+        metaTitleUk: satellite.metaTitleUk || "",
+        metaTitleRu: satellite.metaTitleRu || "",
+        metaDescUk: satellite.metaDescUk || "",
+        metaDescRu: satellite.metaDescRu || "",
+        titleUk: satellite.titleUk || "",
+        titleRu: satellite.titleRu || "",
+        descriptionUk: satellite.descriptionUk || "",
+        descriptionRu: satellite.descriptionRu || "",
+        slugUk: satellite.slugUk || "",
+        slugRu: satellite.slugRu || "",
       });
     } else {
       setFormData({
-        keyId: '',
-        metaTitleUk: '',
-        metaTitleRu: '',
-        metaDescUk: '',
-        metaDescRu: '',
-        titleUk: '',
-        titleRu: '',
-        descriptionUk: '',
-        descriptionRu: '',
-        slugUk: '',
-        slugRu: '',
+        keyId: "",
+        metaTitleUk: "",
+        metaTitleRu: "",
+        metaDescUk: "",
+        metaDescRu: "",
+        titleUk: "",
+        titleRu: "",
+        descriptionUk: "",
+        descriptionRu: "",
+        slugUk: "",
+        slugRu: "",
       });
     }
   }, [satellite, mode, isOpen]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -74,7 +83,7 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
       };
 
       // Здесь должен быть ваш API сервис
-      if (mode === 'create') {
+      if (mode === "create") {
         // await SatelliteService.createSatellite(payload);
         toast.success("Сателлит успешно создан");
       } else {
@@ -98,9 +107,14 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-gray-800">
-              {mode === 'create' ? 'Создать сателлит' : 'Редактировать сателлит'}
+              {mode === "create"
+                ? "Создать сателлит"
+                : "Редактировать сателлит"}
             </h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700"
+            >
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -109,15 +123,33 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
           <DropdownWithSearch
             label="Ключ сателлита"
             value={formData.keyId}
-            onSelect={(id) => setFormData({ ...formData, keyId: id.toString() })}
+            onSelect={(id) =>
+              setFormData({ ...formData, keyId: id.toString() })
+            }
             placeholder="Выберите ключ сателлита..."
             searchPlaceholder="Поиск ключей..."
-            language="ru"
+            onSearch={async (query) => {
+              const results = await MfoSatelliteKeyService.searchSatelliteKeys(
+                query
+              );
+              return results.map((item) => ({
+                id: item.id,
+                name: item.keyRu, // или keyUk
+              }));
+            }}
+            onLoadOption={async (id) => {
+              const data = await MfoSatelliteKeyService.getSatelliteKey(
+                Number(id)
+              );
+              return { id: data.id, name: data.keyRu };
+            }}
           />
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Meta Title (укр.)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Meta Title (укр.)
+              </label>
               <input
                 name="metaTitleUk"
                 type="text"
@@ -129,7 +161,9 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Meta Title (рус.)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Meta Title (рус.)
+              </label>
               <input
                 name="metaTitleRu"
                 type="text"
@@ -143,7 +177,9 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Meta Description (укр.)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Meta Description (укр.)
+              </label>
               <textarea
                 name="metaDescUk"
                 value={formData.metaDescUk}
@@ -155,7 +191,9 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Meta Description (рус.)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Meta Description (рус.)
+              </label>
               <textarea
                 name="metaDescRu"
                 value={formData.metaDescRu}
@@ -169,7 +207,9 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Заголовок (укр.)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Заголовок (укр.)
+              </label>
               <input
                 name="titleUk"
                 type="text"
@@ -181,7 +221,9 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Заголовок (рус.)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Заголовок (рус.)
+              </label>
               <input
                 name="titleRu"
                 type="text"
@@ -195,7 +237,9 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Описание (укр.)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Описание (укр.)
+              </label>
               <textarea
                 name="descriptionUk"
                 value={formData.descriptionUk}
@@ -207,7 +251,9 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Описание (рус.)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Описание (рус.)
+              </label>
               <textarea
                 name="descriptionRu"
                 value={formData.descriptionRu}
@@ -221,7 +267,9 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Слаг (укр.)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Слаг (укр.)
+              </label>
               <input
                 name="slugUk"
                 type="text"
@@ -233,7 +281,9 @@ export default function SatelliteModal({ isOpen, onClose, mode, satellite, onSub
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Слаг (рус.)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Слаг (рус.)
+              </label>
               <input
                 name="slugRu"
                 type="text"

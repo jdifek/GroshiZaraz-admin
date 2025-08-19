@@ -148,7 +148,7 @@ export default function EditAnswerModal({ isOpen, onClose, onSave, answer }: Edi
               value={formData.textOriginal || ''}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2  scrollbar-none border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Введите текст ответа"
             />
           </div>

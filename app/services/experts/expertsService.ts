@@ -1,5 +1,5 @@
 import $api from "../http";
-import { Expert, ExpertPayload } from "./expertsTypes";
+import { Expert, ExpertPayload, ExpertShort } from "./expertsTypes";
 
 export default class ExpertsService {
   static async createExpert(params: ExpertPayload): Promise<void> {
@@ -10,8 +10,22 @@ export default class ExpertsService {
       throw error;
     }
   }
+  static async getShortExperts(q?: string): Promise<ExpertShort[]> {
+    try {
+      const response = await $api.get<ExpertShort[]>("/api/experts/short", {
+        params: { q },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Ошибка при получении короткого списка экспертов:", error);
+      throw error;
+    }
+  }
 
-  static async updateExpert(id: string | number, params: ExpertPayload): Promise<void> {
+  static async updateExpert(
+    id: string | number,
+    params: ExpertPayload
+  ): Promise<void> {
     try {
       await $api.put(`/api/experts/${id}`, params);
     } catch (error) {

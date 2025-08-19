@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
@@ -17,6 +17,7 @@ import {
   Phone,
   ExternalLink,
   Edit3,
+  Trash2,
 } from "lucide-react";
 import { Question } from "@/app/services/Question/questionTypes";
 import DashedButton from "@/app/ui/Buttons/DashedButton";
@@ -32,6 +33,7 @@ interface QuestionCardProps {
   onDelete: (id: number) => void;
   onAddAnswer: (questionId: number) => void;
   onEditAnswer: (answer: any) => void;
+  onDeleteAnswer: (answerId: number) => void;
 }
 
 export default function QuestionCard({
@@ -42,6 +44,7 @@ export default function QuestionCard({
   onDelete,
   onAddAnswer,
   onEditAnswer,
+  onDeleteAnswer,
 }: QuestionCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-all">
@@ -55,7 +58,7 @@ export default function QuestionCard({
               {/* Основная информация - всегда видна */}
               <div className="flex items-center gap-3 mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">
-                  {question.subject || "Без темы"}
+                  {question.mfo.name || "Без темы"}
                 </h3>
                 <div className="flex items-center gap-2">
                   <span
@@ -154,7 +157,7 @@ export default function QuestionCard({
                       </span>
                       <button
                         onClick={() => onAddAnswer(question.id)}
-                        className="ml-auto px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full hover:bg-green-200 transition-colors"
+                        className="ml-auto px-3 py-1 cursor-pointer bg-green-100 text-green-700 text-xs rounded-full hover:bg-green-200 transition-colors"
                       >
                         + Добавить ответ
                       </button>
@@ -213,14 +216,23 @@ export default function QuestionCard({
                               )}
                             </span>
 
-                            {/* Кнопка редактирования ответа */}
-                            <button
-                              onClick={() => onEditAnswer(answer)}
-                              className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors ml-2"
-                              title="Редактировать ответ"
-                            >
-                              <Edit3 className="w-4 h-4" />
-                            </button>
+                            {/* Кнопки редактирования и удаления ответа */}
+                            <div className="flex items-center gap-1 ml-2">
+                              <button
+                                onClick={() => onEditAnswer(answer)}
+                                className="p-1 cursor-pointer text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                title="Редактировать ответ"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => onDeleteAnswer(answer.id)}
+                                className="p-1 text-gray-400 cursor-pointer hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                title="Удалить ответ"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
 
                           {/* Текст ответа */}
