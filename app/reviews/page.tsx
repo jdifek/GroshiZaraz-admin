@@ -6,8 +6,12 @@ import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { toast } from "react-toastify";
 import { BlueButton } from "../ui/Buttons/BlueButton";
-import { Review } from "../services/Review/reviewTypes";
 import ReviewCard from "../components/Cards/ReviewCard";
+import ReviewModal from "../components/ReviewModal";
+import ReviewAnswerModal from "../components/ReviewAnswerModal";
+import EditReviewAnswerModal from "../components/EditReviewAnswerModal";
+import reviewsService from "../services/reviews/reviewsService";
+import { Review } from "../services/reviews/reviewsTypes";
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -31,7 +35,7 @@ export default function ReviewsPage() {
     setIsLoading(true);
     setError(false);
     try {
-      const data = await ReviewService.getAllReviews();
+      const data = await reviewsService.getAllReviews();
       setReviews(data);
     } catch {
       toast.error("Ошибка при загрузке отзывов");
@@ -48,9 +52,9 @@ export default function ReviewsPage() {
   const handleSave = async (data: Partial<Review>) => {
     try {
       if (modalMode === "create") {
-        await ReviewService.createReview(data);
+        await reviewsService.createReview(data);
       } else if (modalMode === "edit" && selectedItem) {
-        await ReviewService.updateReview(selectedItem.id, data);
+        await reviewsService.updateReview(selectedItem.id, data);
       }
       setIsModalOpen(false);
       setSelectedItem(null);
@@ -63,7 +67,7 @@ export default function ReviewsPage() {
   const handleDelete = async (id: number) => {
     if (!confirm("Удалить отзыв?")) return;
     try {
-      await ReviewService.deleteReview(id);
+      await reviewsService.deleteReview(id);
       setReviews((prev) => prev.filter((r) => r.id !== id));
       toast.success("Отзыв удалён");
     } catch {
@@ -257,16 +261,16 @@ export default function ReviewsPage() {
       </div>
 
       {/* Модалка для отзывов */}
-      {/* <ReviewModal
+      <ReviewModal
         isOpen={isModalOpen}
         mode={modalMode}
         review={selectedItem}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
-      /> */}
+      />
 
       {/* Модалка для ответов */}
-      {/* <ReviewAnswerModal
+      <ReviewAnswerModal
         isOpen={isAnswerModalOpen}
         onClose={() => {
           setIsAnswerModalOpen(false);
@@ -274,10 +278,10 @@ export default function ReviewsPage() {
         }}
         onSave={handleSaveAnswer}
         reviewId={selectedReviewId || 0}
-      /> */}
+      />
 
       {/* Модалка для редактирования ответов */}
-      {/* <EditReviewAnswerModal
+      <EditReviewAnswerModal
         isOpen={isEditAnswerModalOpen}
         onClose={() => {
           setIsEditAnswerModalOpen(false);
@@ -285,7 +289,7 @@ export default function ReviewsPage() {
         }}
         onSave={handleSaveEditAnswer}
         answer={selectedAnswer}
-      /> */}
+      />
     </div>
   );
 }

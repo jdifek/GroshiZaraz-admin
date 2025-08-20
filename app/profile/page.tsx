@@ -107,7 +107,7 @@ export default function ProfilePage() {
 
   const getRoleLabel = () => {
     switch (user?.role) {
-      case 'admin':
+      case 'ADMIN':
         return 'Администратор';
       case 'editor':
         return 'Редактор';
@@ -120,7 +120,7 @@ export default function ProfilePage() {
 
   const getRoleBadgeColor = () => {
     switch (user?.role) {
-      case 'admin':
+      case 'ADMIN':
         return 'bg-red-50 text-red-600 border-red-200';
       case 'editor':
         return 'bg-blue-50 text-blue-600 border-blue-200';

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Building2,
   FileText,
@@ -79,6 +79,7 @@ const menuItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
@@ -98,7 +99,7 @@ export default function Sidebar() {
 
   const getRoleLabel = () => {
     switch (user?.role) {
-      case "admin":
+      case "ADMIN":
         return "Администратор";
       case "editor":
         return "Редактор";
@@ -150,29 +151,28 @@ export default function Sidebar() {
   return (
     <div className="bg-white relative shadow-xl border-r border-gray-100 flex flex-col h-screen w-72">
       {/* Логотип */}
-  {/* Кнопка для сворачивания/разворачивания сайдбара */}
-<div className="fixed cursor-pointer top-1/2 -translate-y-1/2 left-72 z-50 transition-all duration-300"
-     style={{ left: isCollapsed ? "0px" : "288px" }}>
-
-  <button
-    onClick={toggleSidebar}
-    className="bg-gradient-to-br cursor-pointer from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700
+      {/* Кнопка для сворачивания/разворачивания сайдбара */}
+      <div
+        className="fixed cursor-pointer top-1/2 -translate-y-1/2 left-72 z-50 transition-all duration-300"
+        style={{ left: isCollapsed ? "0px" : "288px" }}
+      >
+        <button
+          onClick={toggleSidebar}
+          className="bg-gradient-to-br cursor-pointer from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700
                text-white p-1 rounded-r-2xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-105 group"
-    style={{ height: "13vh", minHeight: "10px" }}
-  >
-    <div className="flex cursor-pointer flex-col items-center justify-center h-full gap-3">
-      <div className="w-6 h-6 cursor-pointer bg-white/20 rounded-md flex items-center justify-center group-hover:bg-white/30 transition-colors">
-        {isCollapsed ? (
-          <ChevronRight className="w-4 h-4" />
-        ) : (
-          <ChevronLeft className="w-4 h-4" />
-        )}
+          style={{ height: "13vh", minHeight: "10px" }}
+        >
+          <div className="flex cursor-pointer flex-col items-center justify-center h-full gap-3">
+            <div className="w-6 h-6 cursor-pointer bg-white/20 rounded-md flex items-center justify-center group-hover:bg-white/30 transition-colors">
+              {isCollapsed ? (
+                <ChevronRight className="w-4 h-4" />
+              ) : (
+                <ChevronLeft className="w-4 h-4" />
+              )}
+            </div>
+          </div>
+        </button>
       </div>
-     
-    </div>
-  </button>
-</div>
-
 
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
@@ -183,12 +183,6 @@ export default function Sidebar() {
             <h2 className="text-xl font-bold text-gray-800">MFO Admin</h2>
             <p className="text-sm text-gray-500">Панель управления</p>
           </div>
-          <button
-            onClick={toggleSidebar}
-            className="p-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors group"
-          >
-            <ChevronLeft className="w-5 h-5 text-gray-600 group-hover:text-gray-800" />
-          </button>
         </div>
       </div>
 
@@ -237,7 +231,10 @@ export default function Sidebar() {
                     </p>
                   </div>
                   <button
-                    onClick={() => setIsUserMenuOpen(false)}
+                    onClick={() => {
+                      router.push("/profile");
+                      setIsUserMenuOpen(false);
+                    }}
                     className="w-full flex  cursor-pointer items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     <User className="w-4 h-4" />

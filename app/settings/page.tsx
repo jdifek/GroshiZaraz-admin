@@ -227,7 +227,7 @@ export default function SettingsPage() {
 
   const getRoleLabel = (role: string) => {
     switch (role.toLowerCase()) {
-      case "admin":
+      case "ADMIN":
         return "Администратор";
       case "user":
         return "Пользователь";
@@ -238,7 +238,7 @@ export default function SettingsPage() {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role.toLowerCase()) {
-      case "admin":
+      case "ADMIN":
         return "bg-red-50 text-red-600 border-red-200";
       case "user":
         return "bg-blue-50 text-blue-600 border-blue-200";
@@ -249,7 +249,7 @@ export default function SettingsPage() {
 
   const getRoleIcon = (role: string) => {
     switch (role.toLowerCase()) {
-      case "admin":
+      case "ADMIN":
         return Crown;
       case "user":
         return User;
