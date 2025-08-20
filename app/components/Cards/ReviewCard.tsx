@@ -6,38 +6,31 @@ import {
   MessageSquare,
   Tag,
   User,
-  Mail,
-  Building2,
   Star,
-  Clock,
   Globe,
-  CheckCircle,
-  AlertCircle,
-  Phone,
-  ExternalLink,
   Edit3,
   Trash2,
+  Stars,
 } from "lucide-react";
-import { Question } from "@/app/services/Question/questionTypes";
+import { Review } from "@/app/services/Review/reviewTypes";
 import DashedButton from "@/app/ui/Buttons/DashedButton";
 import { ExpandCollapseButton } from "@/app/ui/Buttons/ExpandCollapseButton";
 import { EditButton } from "@/app/ui/Buttons/EditButton";
 import { TrashButton } from "@/app/ui/Buttons/TrashButton";
 
-interface QuestionCardProps {
-  question: Question;
+interface ReviewCardProps {
+  review: Review;
   isExpanded: boolean;
   onToggleExpansion: () => void;
-  onEdit: (question: Question) => void;
+  onEdit: (review: Review) => void;
   onDelete: (id: number) => void;
-  onAddAnswer: (questionId: number) => void;
+  onAddAnswer: (reviewId: number) => void;
   onEditAnswer: (answer: any) => void;
   onDeleteAnswer: (answerId: number) => void;
-  type?: "mfo" | "site";
 }
 
-export default function QuestionCard({
-  question,
+export default function ReviewCard({
+  review,
   isExpanded,
   onToggleExpansion,
   onEdit,
@@ -45,53 +38,79 @@ export default function QuestionCard({
   onAddAnswer,
   onEditAnswer,
   onDeleteAnswer,
-  type
-}: QuestionCardProps) {
+}: ReviewCardProps) {
+  
+  // Функция для отображения звезд рейтинга
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, index) => (
+      <Star
+        key={index}
+        className={`w-4 h-4 ${
+          index < rating
+            ? "text-yellow-400 fill-yellow-400"
+            : "text-gray-300"
+        }`}
+      />
+    ));
+  };
+
+  // Функция для получения цвета рейтинга
+  const getRatingColor = (rating: number) => {
+    if (rating >= 4) return "text-green-600 bg-green-50";
+    if (rating >= 3) return "text-yellow-600 bg-yellow-50";
+    return "text-red-600 bg-red-50";
+  };
+
+  // Функция для получения типа отзыва
+  const getTargetTypeLabel = (targetType: string) => {
+    switch (targetType) {
+      case 'mfo': return 'МФО';
+      case 'bank': return 'Банк';
+      case 'license': return 'Лицензия';
+      case 'site': return 'Сайт';
+      default: return targetType;
+    }
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-all">
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-start gap-4 flex-1">
-            <div className="p-3 bg-blue-50 rounded-xl">
-              <MessageSquare className="w-6 h-6 text-blue-600" />
+            <div className="p-3 bg-yellow-50 rounded-xl">
+              <Stars className="w-6 h-6 text-yellow-600" />
             </div>
             <div className="flex-1 min-w-0">
               {/* Основная информация - всегда видна */}
               <div className="flex items-center gap-3 mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  {type === 'site' ? question.subject : question?.mfo?.name}
-                </h3>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    {renderStars(review.rating)}
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRatingColor(review.rating)}`}>
+                    {review.rating}/5
+                  </span>
+                </div>
                 <div className="flex items-center gap-2">
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      question.isModerated
+                      review.isModerated
                         ? "bg-green-50 text-green-600"
                         : "bg-yellow-50 text-yellow-600"
                     }`}
                   >
-                    {question.isModerated ? "Одобрено" : "На модерации"}
+                    {review.isModerated ? "Одобрено" : "На модерации"}
                   </span>
                   <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                    {question.category || question.targetType}
+                    {getTargetTypeLabel(review.targetType)}
                   </span>
                 </div>
               </div>
 
               {/* Краткая информация - всегда видна */}
               <div className="mb-4 text-sm text-gray-600 space-y-1">
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-gray-400" />
-                  <span className="font-medium text-gray-700">Автор:</span>
-                  <span>{question.name || "Неизвестен"}</span>
-                  {question.email && (
-                    <>
-                      <Mail className="w-4 h-4 text-gray-400 ml-2" />
-                      <span>{question.email}</span>
-                    </>
-                  )}
-                </div>
                 <div className="line-clamp-2 text-gray-600">
-                  {question.textOriginal}
+                  {review.textOriginal}
                 </div>
               </div>
 
@@ -101,23 +120,26 @@ export default function QuestionCard({
                   isExpanded ? "max-h-none opacity-100" : "max-h-0 opacity-0"
                 }`}
               >
-                {/* Полный текст вопроса */}
+                {/* Полный текст отзыва */}
                 <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-400">
                   <div className="flex items-center gap-2 mb-2">
                     <MessageSquare className="w-4 h-4 text-gray-600" />
                     <span className="text-sm font-medium text-gray-700">
-                      Текст вопроса
+                      Текст отзыва
                     </span>
+                    <div className="flex items-center gap-1 ml-2">
+                      {renderStars(review.rating)}
+                    </div>
                   </div>
                   <p className="text-sm text-gray-600 leading-relaxed">
-                    {question.textOriginal}
+                    {review.textOriginal}
                   </p>
                 </div>
 
                 {/* Переводы, если есть */}
-                {(question.textUk || question.textRu) && (
+                {(review.textUk || review.textRu) && (
                   <div className="grid md:grid-cols-2 gap-4">
-                    {question.textUk && (
+                    {review.textUk && (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Globe className="w-4 h-4 text-blue-600" />
@@ -126,11 +148,11 @@ export default function QuestionCard({
                           </span>
                         </div>
                         <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
-                          {question.textUk}
+                          {review.textUk}
                         </p>
                       </div>
                     )}
-                    {question.textRu && (
+                    {review.textRu && (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Globe className="w-4 h-4 text-red-600" />
@@ -139,30 +161,30 @@ export default function QuestionCard({
                           </span>
                         </div>
                         <p className="text-sm text-gray-600 bg-red-50 p-3 rounded-lg">
-                          {question.textRu}
+                          {review.textRu}
                         </p>
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Ответы на вопрос */}
-                {question.answers && question.answers.length > 0 ? (
+                {/* Ответы на отзыв */}
+                {review.answers && review.answers.length > 0 ? (
                   <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
                     <div className="flex items-center gap-2 mb-3">
                       <MessageSquare className="w-4 h-4 text-green-600" />
                       <span className="text-sm font-medium text-green-700">
-                        Ответы ({question.answers.length})
+                        Ответы ({review.answers.length})
                       </span>
                       <button
-                        onClick={() => onAddAnswer(question.id)}
+                        onClick={() => onAddAnswer(review.id)}
                         className="ml-auto px-3 py-1 cursor-pointer bg-green-100 text-green-700 text-xs rounded-full hover:bg-green-200 transition-colors"
                       >
                         + Добавить ответ
                       </button>
                     </div>
                     <div className="space-y-3">
-                      {question.answers.map((answer) => (
+                      {review.answers.map((answer) => (
                         <div
                           key={answer.id}
                           className={`p-3 rounded-lg border ${
@@ -261,116 +283,7 @@ export default function QuestionCard({
                   </div>
                 ) : (
                   /* Кнопка добавления первого ответа */
-                  <DashedButton onClick={() => onAddAnswer(question.id)} />
-                )}
-
-                {/* Информация о связанном МФО */}
-                {question.mfo && (
-                  <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Building2 className="w-4 h-4 text-green-600" />
-                      <span className="text-sm font-medium text-green-700">
-                        Связанное МФО
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
-                      <img
-                        src={question.mfo.logo}
-                        alt={question.mfo.name}
-                        className="w-12 h-12 rounded object-cover"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="text-base font-semibold text-gray-800">
-                            {question.mfo.name}
-                          </p>
-                          {question.mfo.isActive ? (
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <AlertCircle className="w-4 h-4 text-red-500" />
-                          )}
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500 mb-2">
-                          <span className="flex items-center gap-1">
-                            <Star className="w-3 h-3" />
-                            {question.mfo.rating} ({question.mfo.reviews}{" "}
-                            отзывов)
-                          </span>
-                          <span>
-                            {question.mfo.minAmount}-{question.mfo.maxAmount}₴
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {question.mfo.decisionTime}
-                          </span>
-                          <span>Одобрение: {question.mfo.approvalRate}%</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {question.mfo.isFirstLoanZero && (
-                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                              0% первый займ
-                            </span>
-                          )}
-                          {question.mfo.isInstantApproval && (
-                            <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                              Мгновенное одобрение
-                            </span>
-                          )}
-                          {question.mfo.is24Support && (
-                            <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
-                              24/7 поддержка
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500 mb-1">Лицензия</p>
-                        <p className="text-sm font-medium text-gray-700">
-                          {question.mfo.licenseNumber}
-                        </p>
-                        {question.mfo.website && (
-                          <a
-                            href={question.mfo.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-xs mt-1"
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                            Сайт
-                          </a>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Дополнительная информация о МФО */}
-                    <div className="mt-3 grid md:grid-cols-2 gap-3 text-xs text-gray-600">
-                      <div>
-                        <span className="font-medium">Возраст:</span>{" "}
-                        {question.mfo.ageFrom}-{question.mfo.ageTo} лет
-                      </div>
-                      <div>
-                        <span className="font-medium">Документы:</span>{" "}
-                        {question.mfo.documents}
-                      </div>
-                      <div>
-                        <span className="font-medium">Гражданство:</span>{" "}
-                        {question.mfo.citizenship}
-                      </div>
-                      {question.mfo.phone && (
-                        <div className="flex items-center gap-1">
-                          <Phone className="w-3 h-3" />
-                          <span>{question.mfo.phone}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {question.mfo.description && (
-                      <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                        <span className="font-medium">Описание:</span>{" "}
-                        {question.mfo.description}
-                      </div>
-                    )}
-                  </div>
+                  <DashedButton onClick={() => onAddAnswer(review.id)} />
                 )}
 
                 {/* Мета информация */}
@@ -379,16 +292,16 @@ export default function QuestionCard({
                     <Calendar className="w-3 h-3" />
                     <span>
                       Создан:{" "}
-                      {new Date(question.createdAt).toLocaleDateString("ru-RU")}
+                      {new Date(review.createdAt).toLocaleDateString("ru-RU")}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Tag className="w-3 h-3" />
-                    <span>ID: {question.targetId}</span>
+                    <span>ID: {review.targetId}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Tag className="w-3 h-3" />
-                    <span>Тип: {question.targetType}</span>
+                    <span>Тип: {review.targetType}</span>
                   </div>
                 </div>
               </div>
@@ -403,8 +316,8 @@ export default function QuestionCard({
               onToggle={onToggleExpansion}
             />
 
-            <EditButton item={question} handleClick={onEdit} />
-            <TrashButton id={question.id} handleClick={onDelete} />
+            <EditButton item={review} handleClick={onEdit} />
+            <TrashButton id={review.id} handleClick={onDelete} />
           </div>
         </div>
       </div>

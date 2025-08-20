@@ -258,6 +258,8 @@ export default function QuestionsPage() {
               onEdit={(q) => openModal("edit", q)}
               onDelete={handleDelete}
               onAddAnswer={openAnswerModal}
+              type={'mfo'}
+
               onEditAnswer={openEditAnswerModal}
               onDeleteAnswer={handleDeleteAnswer}
             />

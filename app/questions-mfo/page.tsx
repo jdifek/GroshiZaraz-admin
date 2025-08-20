@@ -1,24 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Search, 
-  Calendar, 
-  MessageSquare,
-  Tag,
-  User,
-  Mail,
-  Globe,
-  HelpCircle,
-} from "lucide-react";
+import { Search } from "lucide-react";
 import { toast } from "react-toastify";
 import { SiteQuestion } from "../services/siteQuestions/siteQuestionsTypes";
 import SiteQuestionService from "../services/siteQuestions/SiteQuestionService";
 import QuestionModal from "../components/QuestionModal";
 import { BlueButton } from "../ui/Buttons/BlueButton";
-import { TrashButton } from "../ui/Buttons/TrashButton";
-import { EditButton } from "../ui/Buttons/EditButton";
-import { ExpandCollapseButton } from "../ui/Buttons/ExpandCollapseButton";
+import QuestionCard from "../components/Cards/QuestionCard";
+import AnswerModal from "../components/AnswerModal";
+import EditAnswerModal from "../components/EditAnswerModal";
 
 export default function QuestionsServicePage() {
   const [questions, setQuestions] = useState<SiteQuestion[]>([]);
@@ -29,7 +21,48 @@ export default function QuestionsServicePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
+  // Состояние для модалки ответов
+  const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false);
+  const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(
+    null
+  );
 
+  // Состояние для модалки редактирования ответов
+  const [isEditAnswerModalOpen, setIsEditAnswerModalOpen] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<any>(null);
+
+  const handleSaveAnswer = async (data: any) => {
+    if (!selectedQuestionId) return;
+
+    try {
+      const payload = {
+        questionId: selectedQuestionId,
+        ...data, // просто берём всё, что вернула модалка
+      };
+
+      const response = await fetch(
+        `http://localhost:5000/api/question-answers`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Ошибка при сохранении ответа");
+      }
+
+      setIsAnswerModalOpen(false);
+      setSelectedQuestionId(null);
+      fetchQuestions();
+      toast.success("Ответ успешно добавлен");
+    } catch (error) {
+      toast.error("Ошибка при добавлении ответа");
+    }
+  };
   const fetchQuestions = async () => {
     setIsLoading(true);
     setError(false);
@@ -41,6 +74,62 @@ export default function QuestionsServicePage() {
       setError(true);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSaveEditAnswer = async (answerId: number, data: any) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/question-answers/${answerId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Ошибка при обновлении ответа");
+      }
+
+      setIsEditAnswerModalOpen(false);
+      setSelectedAnswer(null);
+      fetchQuestions();
+      toast.success("Ответ успешно обновлён");
+    } catch (error) {
+      toast.error("Ошибка при обновлении ответа");
+    }
+  };
+  // Функции для редактирования ответов
+  const openEditAnswerModal = (answer: any) => {
+    setSelectedAnswer(answer);
+    setIsEditAnswerModalOpen(true);
+  };
+  // Функция для удаления ответа
+  const handleDeleteAnswer = async (answerId: number) => {
+    if (!confirm("Удалить ответ?")) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/question-answers/${answerId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Ошибка при удалении ответа");
+      }
+
+      fetchQuestions();
+      toast.success("Ответ успешно удалён");
+    } catch (error) {
+      toast.error("Ошибка при удалении ответа");
     }
   };
 
@@ -74,6 +163,11 @@ export default function QuestionsServicePage() {
     }
   };
 
+  const openAnswerModal = (questionId: number) => {
+    setSelectedQuestionId(questionId);
+    setIsAnswerModalOpen(true);
+  };
+
   const openModal = (
     mode: "create" | "edit",
     item: SiteQuestion | null = null
@@ -87,12 +181,13 @@ export default function QuestionsServicePage() {
     setExpandedCardId(expandedCardId === questionId ? null : questionId);
   };
 
-  const filteredQuestions = questions.filter((q) =>
-    q.textOriginal.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    q.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    q.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    q.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    q.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredQuestions = questions.filter(
+    (q) =>
+      q.textOriginal.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -104,10 +199,14 @@ export default function QuestionsServicePage() {
             Управление вопросами сайта
           </h1>
           <p className="text-gray-600">
-            Модерация и управление вопросами пользователей о сайте ({questions.length})
+            Модерация и управление вопросами пользователей о сайте (
+            {questions.length})
           </p>
         </div>
-        <BlueButton text="Добавить вопрос" onClick={() => openModal("create")} />
+        <BlueButton
+          text="Добавить вопрос"
+          onClick={() => openModal("create")}
+        />
       </div>
 
       {/* Поиск */}
@@ -148,200 +247,20 @@ export default function QuestionsServicePage() {
               : "Вопросы не найдены."}
           </div>
         ) : (
-          filteredQuestions.map((question) => {
-            const isExpanded = expandedCardId === question.id;
-            
-            return (
-              <div
-                key={question.id}
-                className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-all"
-              >
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="p-3 bg-purple-50 rounded-xl">
-                        <HelpCircle className="w-6 h-6 text-purple-600" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        {/* Основная информация - всегда видна */}
-                        <div className="flex items-center gap-3 mb-4">
-                          <h3 className="text-lg font-semibold text-gray-800">
-                            {question.subject || "Без темы"}
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                question.isModerated
-                                  ? "bg-green-50 text-green-600"
-                                  : "bg-yellow-50 text-yellow-600"
-                              }`}
-                            >
-                              {question.isModerated ? "Одобрено" : "На модерации"}
-                            </span>
-                            <span className="bg-purple-50 text-purple-600 px-3 py-1 rounded-full text-sm font-medium">
-                              {question.category || "Общий вопрос"}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Краткая информация - всегда видна */}
-                        <div className="mb-4 text-sm text-gray-600 space-y-1">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-gray-400" />
-                            <span className="font-medium text-gray-700">Автор:</span> 
-                            <span>{question.name || "Неизвестен"}</span>
-                            {question.email && (
-                              <>
-                                <Mail className="w-4 h-4 text-gray-400 ml-2" />
-                                <span>{question.email}</span>
-                              </>
-                            )}
-                          </div>
-                          <div className="line-clamp-2 text-gray-600">
-                            {question.textOriginal}
-                          </div>
-                        </div>
-
-                        {/* Детальная информация - показывается при разворачивании */}
-                        <div className={`space-y-4 transition-all duration-300 overflow-hidden ${
-                          isExpanded ? 'max-h-none opacity-100' : 'max-h-0 opacity-0'
-                        }`}>
-                          {/* Полный текст вопроса */}
-                          <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-400">
-                            <div className="flex items-center gap-2 mb-2">
-                              <MessageSquare className="w-4 h-4 text-gray-600" />
-                              <span className="text-sm font-medium text-gray-700">
-                                Оригинальный текст вопроса
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                              {question.textOriginal}
-                            </p>
-                          </div>
-
-                          {/* Переводы, если есть */}
-                          {(question.textUk || question.textRu) && (
-                            <div className="grid md:grid-cols-2 gap-4">
-                              {question.textUk && (
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2">
-                                    <Globe className="w-4 h-4 text-blue-600" />
-                                    <span className="text-sm font-medium text-blue-700">
-                                      Украинский перевод
-                                    </span>
-                                  </div>
-                                  <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
-                                    {question.textUk}
-                                  </p>
-                                </div>
-                              )}
-                              {question.textRu && (
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2">
-                                    <Globe className="w-4 h-4 text-red-600" />
-                                    <span className="text-sm font-medium text-red-700">
-                                      Русский перевод
-                                    </span>
-                                  </div>
-                                  <p className="text-sm text-gray-600 bg-red-50 p-3 rounded-lg border-l-4 border-red-400">
-                                    {question.textRu}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Информация о категории */}
-                          {question.category && (
-                            <div className="p-4 bg-purple-50 rounded-lg border-l-4 border-purple-400">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Tag className="w-4 h-4 text-purple-600" />
-                                <span className="text-sm font-medium text-purple-700">
-                                  Категория вопроса
-                                </span>
-                              </div>
-                              <p className="text-sm text-purple-800 font-medium">
-                                {question.category}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* Ответы, если есть */}
-                          {question.answers && question.answers.length > 0 && (
-                            <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
-                              <div className="flex items-center gap-2 mb-3">
-                                <MessageSquare className="w-4 h-4 text-green-600" />
-                                <span className="text-sm font-medium text-green-700">
-                                  Ответы ({question.answers.length})
-                                </span>
-                              </div>
-                              <div className="space-y-2">
-                                {question.answers.map((answer) => (
-                                  <div
-                                    key={answer.id}
-                                    className="p-3 bg-white rounded-lg border"
-                                  >
-                                    <p className="text-sm text-gray-700">
-                                      {answer.textOriginal}
-                                    </p>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Мета информация */}
-                          <div className="flex items-center gap-4 text-xs text-gray-400 pt-2 border-t border-gray-100">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              <span>
-                                Создан: {new Date(question.createdAt).toLocaleDateString("ru-RU", {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Tag className="w-3 h-3" />
-                              <span>ID: {question.id}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Tag className="w-3 h-3" />
-                              <span>Тип: {question.targetType}</span>
-                            </div>
-                            {question.targetId && (
-                              <div className="flex items-center gap-1">
-                                <Tag className="w-3 h-3" />
-                                <span>Target ID: {question.targetId}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Кнопки управления */}
-                    <div className="flex items-center gap-2 ml-4 flex-shrink-0">
-                      {/* Кнопка разворачивания/сворачивания */}
-                      <ExpandCollapseButton
-  isExpanded={isExpanded}
-  onToggle={() => toggleCardExpansion(question.id)}
-/>
-                      
-                      <EditButton
-                        item={question}
-                        handleClick={(q) => openModal("edit", q)}
-                      />
-                      <TrashButton id={question.id} handleClick={handleDelete} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })
+          filteredQuestions.map((question) => (
+            <QuestionCard
+              key={question.id}
+              question={question}
+              type={"site"}
+              isExpanded={expandedCardId === question.id}
+              onToggleExpansion={() => toggleCardExpansion(question.id)}
+              onEdit={(q) => openModal("edit", q)}
+              onDelete={handleDelete}
+              onAddAnswer={openAnswerModal}
+              onEditAnswer={openEditAnswerModal}
+              onDeleteAnswer={handleDeleteAnswer}
+            />
+          ))
         )}
       </div>
 
@@ -352,6 +271,28 @@ export default function QuestionsServicePage() {
         question={selectedItem}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
+      />
+
+      {/* Модалка для ответов */}
+      <AnswerModal
+        isOpen={isAnswerModalOpen}
+        onClose={() => {
+          setIsAnswerModalOpen(false);
+          setSelectedQuestionId(null);
+        }}
+        onSave={handleSaveAnswer}
+        questionId={selectedQuestionId || 0}
+      />
+
+      {/* Модалка для редактирования ответов */}
+      <EditAnswerModal
+        isOpen={isEditAnswerModalOpen}
+        onClose={() => {
+          setIsEditAnswerModalOpen(false);
+          setSelectedAnswer(null);
+        }}
+        onSave={handleSaveEditAnswer}
+        answer={selectedAnswer}
       />
     </div>
   );

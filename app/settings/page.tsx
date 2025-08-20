@@ -59,6 +59,7 @@ const mapUserToUserProfile = (user: UserType): UserProfile => ({
   updatedAt: user.updatedAt,
 });
 
+
 export default function SettingsPage() {
   const { user, refreshAuth } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -326,7 +327,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-<BlueButton onClick={() => setIsChangingPassword(true)} Icon={Lock}/>
+<BlueButton text="Изменить пароль" onClick={() => setIsChangingPassword(true)} Icon={Lock}/>
             
             </div>
           ) : (
@@ -720,27 +721,26 @@ export default function SettingsPage() {
                             </h3>
                             {editingUserId === u.id ? (
                               <div className="flex items-center gap-2">
-                                <select
-                                  value={editingRole}
-                                  onChange={(e) =>
-                                    setEditingRole(e.target.value)
-                                  }
-                                  className="border border-gray-300 rounded-lg py-1 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                  <option value="admin">Администратор</option>
-                                  <option value="user">Пользователь</option>
-                                </select>
+                               <select
+  value={editingRole}
+  onChange={(e) => setEditingRole(e.target.value)}
+  className="border border-gray-300 rounded-md py-1.5 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+>
+  <option value="admin">Администратор</option>
+  <option value="user">Пользователь</option>
+</select>
+
                                 <button
                                   onClick={() => saveRoleChange(u.id)}
                                   disabled={isLoading}
-                                  className="text-green-600 hover:text-green-700 p-1 disabled:opacity-50"
+                                  className="text-green-600 cursor-pointer hover:text-green-700 p-1 disabled:opacity-50"
                                   title="Сохранить"
                                 >
                                   <Save className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={cancelEditing}
-                                  className="text-gray-600 hover:text-gray-700 p-1"
+                                  className="text-gray-600 cursor-pointer hover:text-gray-700 p-1"
                                   title="Отменить"
                                 >
                                   <X className="w-4 h-4" />

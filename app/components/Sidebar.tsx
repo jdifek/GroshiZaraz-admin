@@ -64,14 +64,7 @@ const menuItems = [
       { href: "/questions-mfo", label: "Вопросы сайта" },
     ],
   },
-  {
-    icon: MessageSquare,
-    label: "Ответы",
-    children: [
-      { href: "/questionAnswers", label: "Ответы" },
-      { href: "/questionAnswers-mfo", label: "Ответы МФО" },
-    ],
-  },
+
   {
     href: "/expert",
     icon: UserCheck, // или другой подходящий икон, например User or Users
