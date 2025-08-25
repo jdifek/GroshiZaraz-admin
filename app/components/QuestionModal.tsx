@@ -1,5 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { Dropdown } from '../ui/Dropdowns/Dropdown';
+import { usePathname } from "next/navigation";
 
 interface Question {
   id: number;
@@ -12,6 +14,8 @@ interface Question {
   textRu?: string;
   isModerated: boolean;
   createdAt: string;
+  targetType: 'bank' | 'mfo' | 'license' | 'site';
+  targetId: number;
 }
 
 interface QuestionModalProps {
@@ -22,8 +26,35 @@ interface QuestionModalProps {
   question: Question | null;
 }
 
-export default function QuestionModal({ isOpen, onClose, onSave, mode, question }: QuestionModalProps) {
+export default function QuestionModal({
+  isOpen,
+  onClose,
+  onSave,
+  mode,
+  question,
+}: QuestionModalProps) {
   const [formData, setFormData] = useState<Partial<Question>>({});
+  const pathname = usePathname(); // получаем путь
+  const isMfoPage = pathname === "/questions-mfo";
+  const categories = [
+    "Все категории",
+    "Подача заявки",
+    "Сроки",
+    "Документы",
+    "Кредитная история",
+    "Стоимость",
+    "Погашение",
+    "Проблемы с погашением",
+    "Безопасность",
+    "Режим работы",
+  ];
+
+  const targetTypes = [
+    { id: "bank", name: "Банк" },
+    { id: "mfo", name: "МФО" },
+    { id: "license", name: "Лицензия" },
+    { id: "site", name: "Сайт" },
+  ];
 
   useEffect(() => {
     if (isOpen && question && mode === 'edit') {
@@ -33,20 +64,29 @@ export default function QuestionModal({ isOpen, onClose, onSave, mode, question 
         name: '',
         email: '',
         subject: '',
-        category: '',
+        category: 'Все категории',
         textOriginal: '',
         textUk: '',
         textRu: '',
+        targetType: isMfoPage ? 'site' : 'mfo',
+        targetId: isMfoPage ? 1 : 0,
         isModerated: false,
       });
     }
-  }, [isOpen, question, mode]);
+  }, [isOpen, question, mode, isMfoPage]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === 'checkbox' ? checked : (type === 'number' ? Number(value) : value),
+    }));
+  };
+
+  const handleSelect = (name: string, value: string | number) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
     }));
   };
 
@@ -68,9 +108,37 @@ export default function QuestionModal({ isOpen, onClose, onSave, mode, question 
           <InputField label="Имя" name="name" value={formData.name || ''} onChange={handleChange} />
           <InputField label="Email" name="email" value={formData.email || ''} onChange={handleChange} />
           <InputField label="Тема" name="subject" value={formData.subject || ''} onChange={handleChange} />
-          <InputField label="Категория" name="category" value={formData.category || ''} onChange={handleChange} />
 
-          <TextareaField label="Текст вопроса (оригинал)" name="textOriginal" value={formData.textOriginal || ''} onChange={handleChange} />
+          {/* Категория */}
+          <Dropdown
+            label="Категория"
+            options={categories.map(cat => ({ id: cat, name: cat }))}
+            value={formData.category || 'Все категории'}
+            onSelect={(val) => handleSelect('category', val)}
+          />
+
+          <TextareaField
+            label="Текст вопроса (оригинал)"
+            name="textOriginal"
+            value={formData.textOriginal || ''}
+            onChange={handleChange}
+          />
+
+          {/* Тип объекта */}
+          <Dropdown
+            label="Тип объекта"
+            options={targetTypes}
+            value={formData.targetType || 'mfo'}
+            onSelect={(val) => handleSelect('targetType', val)}
+          />
+<InputField
+  label="ID объекта (targetId)"
+  name="targetId"
+  type="number"
+  value={formData.targetId?.toString() || '0'}
+  onChange={handleChange}
+  disabled={isMfoPage}
+/>
 
           {mode === 'edit' && (
             <>
@@ -89,7 +157,6 @@ export default function QuestionModal({ isOpen, onClose, onSave, mode, question 
                   Одобрено модератором
                 </label>
               </div>
-
             </>
           )}
 
@@ -120,12 +187,14 @@ function InputField({
   value,
   onChange,
   type = 'text',
+  disabled
 }: {
   label: string;
   name: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
+  disabled?: boolean;
 }) {
   return (
     <div>
@@ -135,6 +204,7 @@ function InputField({
         type={type}
         value={value}
         onChange={onChange}
+        disabled={disabled}
         className="mt-1 w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
     </div>
