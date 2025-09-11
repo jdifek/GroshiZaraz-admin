@@ -14,18 +14,17 @@ import {
   Building2,
   Star,
   Users,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import MfoSatelliteService from "../services/MfoSatellite/MfoSatelliteService";
 import { BlueButton } from "../ui/Buttons/BlueButton";
-import { MfoSatellite } from "../services/MfoSatellite/mfoSatelliteTypes";
+import { Mfo, MfoSatellite } from "../services/MfoSatellite/mfoSatelliteTypes";
 import { ExpandCollapseButton } from "../ui/Buttons/ExpandCollapseButton";
 import { EditButton } from "../ui/Buttons/EditButton";
 import { DeleteButton } from "../ui/Buttons/DeleteButton";
 import SatelliteModal from "../components/SatelliteModal";
-
-// Типы данных на основе вашего JSON
-
-
+import MfoSelectorModal from "../components/MfoSelectorModal";
 
 export default function SatellitesPage() {
   const [satellites, setSatellites] = useState<MfoSatellite[]>([]);
@@ -40,7 +39,8 @@ export default function SatellitesPage() {
     null
   );
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
-
+  const [isMfoModalOpen, setIsMfoModalOpen] = useState(false);
+  const [currentItemId, setCurrentItemId] = useState<number | null>(null);
   const fetchSatellites = async () => {
     setIsLoading(true);
     setError(false);
@@ -84,6 +84,55 @@ export default function SatellitesPage() {
     }
   };
 
+  const addMfoToSatellite = (satelliteId: number) => {
+    setCurrentItemId(satelliteId);
+    setIsMfoModalOpen(true);
+  };
+  const handleMfoAdd = async (mfo: Mfo) => {
+    if (!currentItemId) return;
+    
+    try {
+      // await MfoSatelliteService.addMfoToSatellite(currentItemId, mfo.id);
+      console.log(`Добавляем МФО ${mfo.name} к сателлиту ${currentItemId}`);
+      fetchSatellites(); // Обновляем данные
+    } catch (error) {
+      console.error('Ошибка при добавлении МФО:', error);
+    }
+  };
+  
+  const handleMfoRemove = async (mfoId: number) => {
+    if (!currentItemId) return;
+    
+    try {
+      // await MfoSatelliteService.removeMfoFromSatellite(currentItemId, mfoId);
+      console.log(`Удаляем МФО ${mfoId} из сателлита ${currentItemId}`);
+      fetchSatellites(); // Обновляем данные
+    } catch (error) {
+      console.error('Ошибка при удалении МФО:', error);
+    }
+  };
+  const handleMfoSelect = async (mfo: Mfo) => {
+    if (!currentItemId) return;
+    
+    try {
+      // Здесь вызов API для связывания МФО с сателлитом
+      // await MfoSatelliteService.addMfoToSatellite(currentItemId, mfo.id);
+      console.log(`Добавляем МФО ${mfo.name} к сателлиту ${currentItemId}`);
+      fetchSatellites(); // Обновляем данные
+    } catch (error) {
+      console.error('Ошибка при добавлении МФО:', error);
+    }
+  };
+  
+  const removeMfoFromSatellite = async (satelliteId: number, mfoId: number) => {
+    try {
+      // await MfoSatelliteService.removeMfoFromSatellite(satelliteId, mfoId);
+      console.log(`Удаляем МФО ${mfoId} из сателлита ${satelliteId}`);
+      fetchSatellites(); // Обновляем данные
+    } catch (error) {
+      console.error('Ошибка при удалении МФО:', error);
+    }
+  };
   const filteredSatellites = satellites.filter((satellite) => {
     const searchTarget =
       `${satellite.titleUk} ${satellite.titleRu} ${satellite.metaTitleUk} ${satellite.metaTitleRu} ${satellite.descriptionUk} ${satellite.descriptionRu}`.toLowerCase();
@@ -183,11 +232,21 @@ export default function SatellitesPage() {
                             {satellite.slugUk !== satellite.slugRu &&
                               ` / ${satellite.slugRu}`}
                           </div>
-                          <div>
-                            <span className="font-medium text-gray-700">
-                              МФО:
-                            </span>{" "}
-                            {satellite.mfoLinks?.length || 0} связанных
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1">
+                              <Building2 className="w-4 h-4" />
+                              <span>
+                                {satellite.mfoLinks?.length || 0} МФО
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-gray-400">
+                              <Calendar className="w-3 h-3" />
+                              <span>
+                                {new Date(satellite.createdAt).toLocaleDateString(
+                                  "ru-RU"
+                                )}
+                              </span>
+                            </div>
                           </div>
                         </div>
 
@@ -343,11 +402,20 @@ export default function SatellitesPage() {
                           {satellite.mfoLinks &&
                             satellite.mfoLinks.length > 0 && (
                               <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
-                                <div className="flex items-center gap-2 mb-3">
-                                  <Building2 className="w-4 h-4 text-green-600" />
-                                  <span className="text-sm font-medium text-green-700">
-                                    Связанные МФО ({satellite.mfoLinks.length})
-                                  </span>
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <Building2 className="w-4 h-4 text-green-600" />
+                                    <span className="text-sm font-medium text-green-700">
+                                      Связанные МФО ({satellite.mfoLinks.length})
+                                    </span>
+                                  </div>
+                                  <button
+                                    onClick={() => addMfoToSatellite(satellite.id)}
+                                    className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 text-xs rounded-md transition-colors"
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                    Добавить МФО
+                                  </button>
                                 </div>
                                 <div className="grid gap-2">
                                   {(expandedSatelliteId === satellite.id
@@ -356,7 +424,7 @@ export default function SatellitesPage() {
                                   ).map((link) => (
                                     <div
                                       key={link.id}
-                                      className="flex items-center gap-3 p-2 bg-white rounded-lg border"
+                                      className="flex items-center gap-3 p-2 bg-white rounded-lg border group"
                                     >
                                       <img
                                         src={link.mfo.logo}
@@ -382,6 +450,13 @@ export default function SatellitesPage() {
                                           </span>
                                         </div>
                                       </div>
+                                      <button
+                                        onClick={() => removeMfoFromSatellite(satellite.id, link.mfo.id)}
+                                        className="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-all"
+                                        title="Удалить МФО"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </button>
                                     </div>
                                   ))}
                                 </div>
@@ -403,6 +478,25 @@ export default function SatellitesPage() {
                                 )}
                               </div>
                             )}
+
+                          {/* Если нет МФО, показываем кнопку добавления */}
+                          {(!satellite.mfoLinks || satellite.mfoLinks.length === 0) && (
+                            <div className="p-3 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                              <div className="text-center">
+                                <Building2 className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-500 mb-2">
+                                  К этому сателлиту не привязаны МФО
+                                </p>
+                                <button
+                                  onClick={() => addMfoToSatellite(satellite.id)}
+                                  className="flex items-center gap-1 px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm rounded-md transition-colors mx-auto"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  Добавить МФО
+                                </button>
+                              </div>
+                            </div>
+                          )}
 
                           {/* Мета информация */}
                           <div className="flex items-center gap-4 text-xs text-gray-400 pt-2 border-t border-gray-100">
@@ -442,11 +536,10 @@ export default function SatellitesPage() {
                           openModal("edit", satellite)
                         }
                       />
-                     <DeleteButton
-  onClick={() => deleteSatellite(satellite.id)}
-  title="Удалить"
-/>
-
+                      <DeleteButton
+                        onClick={() => deleteSatellite(satellite.id)}
+                        title="Удалить"
+                      />
                     </div>
                   </div>
                 </div>
@@ -464,6 +557,22 @@ export default function SatellitesPage() {
         satellite={selectedSatellite || undefined}
         onSubmitSuccess={fetchSatellites}
       />
+{/* Модалка выбора МФО */}
+<MfoSelectorModal
+  isOpen={isMfoModalOpen}
+  onClose={() => {
+    setIsMfoModalOpen(false);
+    setCurrentItemId(null);
+  }}
+  onAdd={handleMfoAdd}
+  onRemove={handleMfoRemove}
+  selectedMfoIds={
+    currentItemId 
+      ? (satellites.find(s => s.id === currentItemId)?.mfoLinks?.map(link => link.mfo.id) || [])
+      : []
+  }
+  title="Управление МФО для сателлита"
+/>
     </div>
   );
 }

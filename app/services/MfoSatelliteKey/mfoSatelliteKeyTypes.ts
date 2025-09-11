@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface MfoSatelliteKey {
   id: number;
   keyUk: string;
@@ -19,6 +20,7 @@ export interface MfoSatelliteKey {
     titleUk?: string;
     titleRu?: string;
   }>;
+  mfoLinks: any[]
 }
 
 export interface MfoSatelliteKeyPayload {

@@ -34,3 +34,8 @@ export interface Review {
   createdAt: string;
   answers?: ReviewAnswer[];
 }
+
+export interface ReviewsResponse {
+  pendingCount: number;
+  reviews: Review[];
+}

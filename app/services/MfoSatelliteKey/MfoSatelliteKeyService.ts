@@ -50,10 +50,33 @@ export default class MfoSatelliteKeyService {
       throw error;
     }
   }
+  static async updateMfoLinks(keyId: number, addMfoIds: number[], removeMfoIds: number[]): Promise<MfoSatelliteKey> {
+    const response = await $api.put(`/api/mfo-satellite-keys/${keyId}/mfo-links`, {
+      addMfoIds,
+      removeMfoIds
+    });
+    return response.data;
+  }
+
+  static async addMfoToKey(keyId: number, mfoId: number): Promise<MfoSatelliteKey> {
+    const response = await $api.post(`/api/mfo-satellite-keys/${keyId}/mfo`, { mfoId });
+    return response.data;
+  }
+
+  static async removeMfoFromKey(keyId: number, mfoId: number): Promise<void> {
+    await $api.delete(`/api/mfo-satellite-keys/${keyId}/mfo/${mfoId}`);
+  }
+
+  static async getShortKeys(query?: string): Promise<Array<{ id: number; keyUk: string; keyRu: string }>> {
+    const response = await $api.get(`/api/mfo-satellite-keys/short`, {
+      params: query ? { q: query } : {}
+    });
+    return response.data;
+  }
 
   static async getAllSatelliteKeys(): Promise<MfoSatelliteKey[]> {
     try {
-      const response = await $api.get<MfoSatelliteKey[]>('/api/mfo-satellite-keys');
+      const response = await $api.get<MfoSatelliteKey[]>('api/mfo-satellite-keys');
       return response.data;
     } catch (error) {
       console.error('Ошибка при получении списка ключей сателлитов:', error);

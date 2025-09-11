@@ -1,6 +1,6 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { Star } from 'lucide-react';
+"use client";
+import { useState, useEffect } from "react";
+import { Star } from "lucide-react";
 
 interface Review {
   id: number;
@@ -10,48 +10,59 @@ interface Review {
   textRu?: string;
   isModerated: boolean;
   targetType: string;
-  targetId: number;
-  createdAt: string;
 }
 
 interface ReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: Partial<Review>) => void;
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   review: Review | null;
 }
 
-export default function ReviewModal({ isOpen, onClose, onSave, mode, review }: ReviewModalProps) {
+export default function ReviewModal({
+  isOpen,
+  onClose,
+  onSave,
+  mode,
+  review,
+}: ReviewModalProps) {
   const [formData, setFormData] = useState<Partial<Review>>({});
 
   useEffect(() => {
-    if (isOpen && review && mode === 'edit') {
+    if (isOpen && review && mode === "edit") {
       setFormData({ ...review });
     } else {
       setFormData({
         rating: 5,
-        textOriginal: '',
-        textUk: '',
-        textRu: '',
+        textOriginal: "",
+        textUk: "",
+        textRu: "",
         isModerated: false,
-        targetType: 'mfo',
-        targetId: 1,
       });
     }
   }, [isOpen, review, mode]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : (name === 'rating' || name === 'targetId') ? parseInt(value) : value,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : name === "rating" || name === "targetId"
+          ? parseInt(value)
+          : value,
     }));
   };
 
   const handleRatingClick = (rating: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       rating,
     }));
@@ -64,24 +75,20 @@ export default function ReviewModal({ isOpen, onClose, onSave, mode, review }: R
 
   if (!isOpen) return null;
 
-  const targetTypes = [
-    { value: 'mfo', label: 'МФО' },
-    { value: 'bank', label: 'Банк' },
-    { value: 'license', label: 'Лицензия' },
-    { value: 'site', label: 'Сайт' },
-  ];
+
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-6 w-full max-w-xl mx-4 overflow-y-auto scrollbar-none max-h-[90vh]">
         <h2 className="text-xl font-bold text-gray-800 mb-4">
-          {mode === 'create' ? 'Создать отзыв' : 'Редактировать отзыв'}
+          {mode === "create" ? "Создать отзыв" : "Редактировать отзыв"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* Рейтинг */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Рейтинг</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Рейтинг
+            </label>
             <div className="flex gap-1">
               {Array.from({ length: 5 }, (_, index) => (
                 <button
@@ -105,53 +112,27 @@ export default function ReviewModal({ isOpen, onClose, onSave, mode, review }: R
             </div>
           </div>
 
-          {/* Тип цели */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Тип объекта</label>
-            <select
-              name="targetType"
-              value={formData.targetType || 'mfo'}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              {targetTypes.map(type => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* ID цели */}
-          <InputField 
-            label="ID объекта" 
-            name="targetId" 
-            type="number"
-            value={formData.targetId?.toString() || ''} 
-            onChange={handleChange} 
-          />
-
           {/* Текст отзыва */}
-          <TextareaField 
-            label="Текст отзыва (оригинал)" 
-            name="textOriginal" 
-            value={formData.textOriginal || ''} 
-            onChange={handleChange} 
+          <TextareaField
+            label="Текст отзыва (оригинал)"
+            name="textOriginal"
+            value={formData.textOriginal || ""}
+            onChange={handleChange}
           />
 
-          {mode === 'edit' && (
+          {mode === "edit" && (
             <>
-              <TextareaField 
-                label="Текст (украинский)" 
-                name="textUk" 
-                value={formData.textUk || ''} 
-                onChange={handleChange} 
+              <TextareaField
+                label="Текст (украинский)"
+                name="textUk"
+                value={formData.textUk || ""}
+                onChange={handleChange}
               />
-              <TextareaField 
-                label="Текст (русский)" 
-                name="textRu" 
-                value={formData.textRu || ''} 
-                onChange={handleChange} 
+              <TextareaField
+                label="Текст (русский)"
+                name="textRu"
+                value={formData.textRu || ""}
+                onChange={handleChange}
               />
 
               <div className="flex items-center gap-2">
@@ -190,33 +171,6 @@ export default function ReviewModal({ isOpen, onClose, onSave, mode, review }: R
   );
 }
 
-function InputField({
-  label,
-  name,
-  value,
-  onChange,
-  type = 'text',
-}: {
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <input
-        name={name}
-        type={type}
-        value={value}
-        onChange={onChange}
-        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      />
-    </div>
-  );
-}
-
 function TextareaField({
   label,
   name,
@@ -230,7 +184,9 @@ function TextareaField({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
       <textarea
         name={name}
         rows={3}

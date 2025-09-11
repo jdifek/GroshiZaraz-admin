@@ -38,7 +38,6 @@ export default function NewsModal({
     readingMinutes: 0,
     authorId: "",
     newsCategoryId: "",
-    createdAt: "", // или Date, если хочешь
   });
 
   useEffect(() => {
@@ -120,15 +119,23 @@ export default function NewsModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const payload = {
+  
+    const payload: any = {
       ...formData,
       authorId: Number(formData.authorId),
       newsCategoryId: Number(formData.newsCategoryId),
       views: Number(formData.views),
       readingMinutes: Number(formData.readingMinutes),
     };
-
+    
+    // если createdAt пустое — не добавляем в payload
+    if (formData.createdAt) {
+      payload.createdAt = new Date(formData.createdAt);
+    } else {
+      delete payload.createdAt;
+    }
+    
+  
     try {
       if (mode === "edit" && newsItem?.id) {
         await NewsService.updateNews(newsItem.id, payload);
@@ -137,7 +144,7 @@ export default function NewsModal({
         await NewsService.createNews(payload);
         toast.success("Новость успешно создана");
       }
-
+  
       onSubmitSuccess();
       onClose();
     } catch (err) {
@@ -145,6 +152,7 @@ export default function NewsModal({
       toast.error("Ошибка при сохранении новости");
     }
   };
+  
 
   return (
     <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center  overflow-auto px-4">

@@ -1,3 +1,10 @@
+export interface PromoCode {
+  code: string;
+  discount: string;
+  condition: string;
+  validTill: string;
+}
+
 export interface Mfo {
   id: number;
   name: string;
@@ -14,8 +21,13 @@ export interface Mfo {
   maxTerm: number;
   rateMin: number;
   rateMax: number;
+  dailyRate: number;       // ставка в день
+  commission: number;      // комиссия
   approvalRate: number;
+  collateral: string;      // залог
   decisionTime: string;
+  decisionType: string;    // тип решения
+  application: string;     // подача заявки
 
   isFirstLoanZero: boolean;
   isInstantApproval: boolean;
@@ -36,8 +48,11 @@ export interface Mfo {
   workTimeWeekend?: string;
   workTimeOnline?: string;
 
+  promoCodes?: PromoCode[];
+
   createdAt: string;
   updatedAt: string;
 }
 
+// Массив promoCodes и новые поля включены
 export type MfoPayload = Omit<Mfo, 'id' | 'createdAt' | 'updatedAt'>;

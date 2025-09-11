@@ -12,11 +12,11 @@ import {
   Trash2,
   Stars,
 } from "lucide-react";
-import { Review } from "@/app/services/Review/reviewTypes";
 import DashedButton from "@/app/ui/Buttons/DashedButton";
 import { ExpandCollapseButton } from "@/app/ui/Buttons/ExpandCollapseButton";
 import { EditButton } from "@/app/ui/Buttons/EditButton";
 import { TrashButton } from "@/app/ui/Buttons/TrashButton";
+import { Review } from "@/app/services/reviews/reviewsTypes";
 
 interface ReviewCardProps {
   review: Review;
@@ -283,7 +283,7 @@ export default function ReviewCard({
                   </div>
                 ) : (
                   /* Кнопка добавления первого ответа */
-                  <DashedButton onClick={() => onAddAnswer(review.id)} />
+                  <DashedButton onClick={() => onAddAnswer(review.id)} text="+ Добавить первый ответ на отзыв"/>
                 )}
 
                 {/* Мета информация */}

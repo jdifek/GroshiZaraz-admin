@@ -10,6 +10,7 @@ export default class MfoService {
       throw error;
     }
   }
+  
 
   static async updateMfo(id: number, params: MfoPayload): Promise<void> {
     try {
@@ -48,4 +49,5 @@ export default class MfoService {
       throw error;
     }
   }
+  
 }

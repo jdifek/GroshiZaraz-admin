@@ -10,8 +10,9 @@ import ReviewCard from "../components/Cards/ReviewCard";
 import ReviewModal from "../components/ReviewModal";
 import ReviewAnswerModal from "../components/ReviewAnswerModal";
 import EditReviewAnswerModal from "../components/EditReviewAnswerModal";
-import reviewsService from "../services/reviews/reviewsService";
 import { Review } from "../services/reviews/reviewsTypes";
+import SiteReviewService from "../services/site-reviews/siteReviewsService";
+import reviewsService from "../services/reviews/reviewsService";
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -22,6 +23,7 @@ export default function ReviewsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
+  const [pendingCount, setPendingCount] = useState(0); // 👈 новое состояние
 
   // Состояние для модалки ответов
   const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false);
@@ -35,8 +37,10 @@ export default function ReviewsPage() {
     setIsLoading(true);
     setError(false);
     try {
-      const data = await reviewsService.getAllReviews();
-      setReviews(data);
+      const { reviews, pendingCount } = await SiteReviewService.getAllReviews();
+      setReviews(reviews);
+      setPendingCount(pendingCount); // 👈 сохраняем количество
+
     } catch {
       toast.error("Ошибка при загрузке отзывов");
       setError(true);
@@ -52,7 +56,7 @@ export default function ReviewsPage() {
   const handleSave = async (data: Partial<Review>) => {
     try {
       if (modalMode === "create") {
-        await reviewsService.createReview(data);
+        await SiteReviewService.createReview(data);
       } else if (modalMode === "edit" && selectedItem) {
         await reviewsService.updateReview(selectedItem.id, data);
       }
@@ -93,28 +97,25 @@ export default function ReviewsPage() {
 
   const handleSaveAnswer = async (data: any) => {
     if (!selectedReviewId) return;
-  
+
     try {
       const payload = {
         reviewId: selectedReviewId,
         ...data, // просто берём всё, что вернула модалка
       };
-  
-      const response = await fetch(
-        `http://localhost:5000/api/review-answers`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-  
+
+      const response = await fetch(`http://localhost:5000/api/review-answers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
       if (!response.ok) {
         throw new Error("Ошибка при сохранении ответа");
       }
-  
+
       setIsAnswerModalOpen(false);
       setSelectedReviewId(null);
       fetchReviews();
@@ -123,7 +124,7 @@ export default function ReviewsPage() {
       toast.error("Ошибка при добавлении ответа");
     }
   };
-  
+
   // Функции для редактирования ответов
   const openEditAnswerModal = (answer: any) => {
     setSelectedAnswer(answer);
@@ -159,7 +160,7 @@ export default function ReviewsPage() {
   // Функция для удаления ответа
   const handleDeleteAnswer = async (answerId: number) => {
     if (!confirm("Удалить ответ?")) return;
-    
+
     try {
       const response = await fetch(
         `http://localhost:5000/api/review-answers/${answerId}`,
@@ -192,19 +193,24 @@ export default function ReviewsPage() {
     <div className="space-y-6">
       {/* Заголовок и кнопка */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-1">
-            Управление отзывами
-          </h1>
-          <p className="text-gray-600">
-            Модерация и управление отзывами пользователей ({reviews.length})
-          </p>
-        </div>
-        <BlueButton
-          text="Добавить отзыв"
-          onClick={() => openModal("create")}
-        />
-      </div>
+  <div>
+    <h1 className="text-3xl font-bold text-gray-800 mb-1">
+      Управление отзывами сайта
+    </h1>
+    <p className="text-gray-600">
+      Модерация и управление отзывами пользователей ({reviews.length})
+    </p>
+
+    {/* 👇 бейдж для количества на модерации */}
+    {pendingCount > 0 && (
+      <span className="inline-block mt-2 px-3 py-1 text-sm font-medium rounded-full bg-orange-100 text-orange-700 border border-orange-200">
+        На модерации: {pendingCount}
+      </span>
+    )}
+  </div>
+  <BlueButton text="Добавить отзыв" onClick={() => openModal("create")} />
+</div>
+
 
       {/* Поиск */}
       <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
