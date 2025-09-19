@@ -11,7 +11,6 @@ import ReviewModal from "../components/ReviewModal";
 import ReviewAnswerModal from "../components/ReviewAnswerModal";
 import EditReviewAnswerModal from "../components/EditReviewAnswerModal";
 import { Review } from "../services/reviews/reviewsTypes";
-import SiteReviewService from "../services/site-reviews/siteReviewsService";
 import reviewsService from "../services/reviews/reviewsService";
 
 export default function ReviewsPage() {
@@ -37,7 +36,7 @@ export default function ReviewsPage() {
     setIsLoading(true);
     setError(false);
     try {
-      const { reviews, pendingCount } = await SiteReviewService.getAllReviews();
+      const { reviews, pendingCount } = await reviewsService.getAllReviews();
       setReviews(reviews);
       setPendingCount(pendingCount); // 👈 сохраняем количество
 
@@ -56,7 +55,7 @@ export default function ReviewsPage() {
   const handleSave = async (data: Partial<Review>) => {
     try {
       if (modalMode === "create") {
-        await SiteReviewService.createReview(data);
+        await reviewsService.createReview(data);
       } else if (modalMode === "edit" && selectedItem) {
         await reviewsService.updateReview(selectedItem.id, data);
       }

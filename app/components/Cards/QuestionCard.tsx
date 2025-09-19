@@ -365,10 +365,11 @@ export default function QuestionCard({
                     </div>
 
                     {question.mfo.description && (
-                      <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                        <span className="font-medium">Описание:</span>{" "}
-                        {question.mfo.description}
-                      </div>
+                      <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600 
+                      whitespace-pre-wrap break-all">
+        <span className="font-medium">Описание:</span>{" "}
+        {question.mfo.description}
+      </div>
                     )}
                   </div>
                 )}

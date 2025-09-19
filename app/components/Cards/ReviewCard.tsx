@@ -6,17 +6,24 @@ import {
   MessageSquare,
   Tag,
   User,
+  Mail,
+  Building2,
   Star,
+  Clock,
   Globe,
+  CheckCircle,
+  AlertCircle,
+  Phone,
+  ExternalLink,
   Edit3,
   Trash2,
-  Stars,
+  ThumbsUp,
 } from "lucide-react";
+import { Review } from "@/app/services/reviews/reviewsTypes";
 import DashedButton from "@/app/ui/Buttons/DashedButton";
 import { ExpandCollapseButton } from "@/app/ui/Buttons/ExpandCollapseButton";
 import { EditButton } from "@/app/ui/Buttons/EditButton";
 import { TrashButton } from "@/app/ui/Buttons/TrashButton";
-import { Review } from "@/app/services/reviews/reviewsTypes";
 
 interface ReviewCardProps {
   review: Review;
@@ -39,10 +46,9 @@ export default function ReviewCard({
   onEditAnswer,
   onDeleteAnswer,
 }: ReviewCardProps) {
-  
-  // Функция для отображения звезд рейтинга
+  // Функция для отображения звездного рейтинга
   const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, index) => (
+    return Array.from({ length: 5 }).map((_, index) => (
       <Star
         key={index}
         className={`w-4 h-4 ${
@@ -54,40 +60,20 @@ export default function ReviewCard({
     ));
   };
 
-  // Функция для получения цвета рейтинга
-  const getRatingColor = (rating: number) => {
-    if (rating >= 4) return "text-green-600 bg-green-50";
-    if (rating >= 3) return "text-yellow-600 bg-yellow-50";
-    return "text-red-600 bg-red-50";
-  };
-
-  // Функция для получения типа отзыва
-  const getTargetTypeLabel = (targetType: string) => {
-    switch (targetType) {
-      case 'mfo': return 'МФО';
-      case 'bank': return 'Банк';
-      case 'license': return 'Лицензия';
-      case 'site': return 'Сайт';
-      default: return targetType;
-    }
-  };
-
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-all">
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-start gap-4 flex-1">
-            <div className="p-3 bg-yellow-50 rounded-xl">
-              <Stars className="w-6 h-6 text-yellow-600" />
+            <div className="p-3 bg-orange-50 rounded-xl">
+              <ThumbsUp className="w-6 h-6 text-orange-600" />
             </div>
             <div className="flex-1 min-w-0">
               {/* Основная информация - всегда видна */}
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    {renderStars(review.rating)}
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRatingColor(review.rating)}`}>
+                  {renderStars(review.rating)}
+                  <span className="text-lg font-semibold text-gray-800">
                     {review.rating}/5
                   </span>
                 </div>
@@ -101,14 +87,25 @@ export default function ReviewCard({
                   >
                     {review.isModerated ? "Одобрено" : "На модерации"}
                   </span>
-                  <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                    {getTargetTypeLabel(review.targetType)}
+                  <span className="bg-purple-50 text-purple-600 px-3 py-1 rounded-full text-sm font-medium">
+                    {review.targetType === "mfo" ? "МФО" : review.targetType}
                   </span>
                 </div>
               </div>
 
               {/* Краткая информация - всегда видна */}
               <div className="mb-4 text-sm text-gray-600 space-y-1">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-400" />
+                  <span className="font-medium text-gray-700">Автор:</span>
+                  <span>{review.authorName || "Анонимный отзыв"}</span>
+                  {review.authorEmail && (
+                    <>
+                      <Mail className="w-4 h-4 text-gray-400 ml-2" />
+                      <span>{review.authorEmail}</span>
+                    </>
+                  )}
+                </div>
                 <div className="line-clamp-2 text-gray-600">
                   {review.textOriginal}
                 </div>
@@ -127,9 +124,6 @@ export default function ReviewCard({
                     <span className="text-sm font-medium text-gray-700">
                       Текст отзыва
                     </span>
-                    <div className="flex items-center gap-1 ml-2">
-                      {renderStars(review.rating)}
-                    </div>
                   </div>
                   <p className="text-sm text-gray-600 leading-relaxed">
                     {review.textOriginal}
@@ -283,7 +277,117 @@ export default function ReviewCard({
                   </div>
                 ) : (
                   /* Кнопка добавления первого ответа */
-                  <DashedButton onClick={() => onAddAnswer(review.id)} text="+ Добавить первый ответ на отзыв"/>
+                  <DashedButton onClick={() => onAddAnswer(review.id)} />
+                )}
+
+                {/* Информация о связанном МФО */}
+                {review.mfo && (
+                  <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Building2 className="w-4 h-4 text-green-600" />
+                      <span className="text-sm font-medium text-green-700">
+                        Связанное МФО
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                      <img
+                        src={review.mfo.logo}
+                        alt={review.mfo.name}
+                        className="w-12 h-12 rounded object-cover"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-base font-semibold text-gray-800">
+                            {review.mfo.name}
+                          </p>
+                          {review.mfo.isActive ? (
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <AlertCircle className="w-4 h-4 text-red-500" />
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500 mb-2">
+                          <span className="flex items-center gap-1">
+                            <Star className="w-3 h-3" />
+                            {review.mfo.rating} ({review.mfo.reviews}{" "}
+                            отзывов)
+                          </span>
+                          <span>
+                            {review.mfo.minAmount}-{review.mfo.maxAmount}₴
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {review.mfo.decisionTime}
+                          </span>
+                          <span>Одобрение: {review.mfo.approvalRate}%</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {review.mfo.isFirstLoanZero && (
+                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                              0% первый займ
+                            </span>
+                          )}
+                          {review.mfo.isInstantApproval && (
+                            <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                              Мгновенное одобрение
+                            </span>
+                          )}
+                          {review.mfo.is24Support && (
+                            <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                              24/7 поддержка
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500 mb-1">Лицензия</p>
+                        <p className="text-sm font-medium text-gray-700">
+                          {review.mfo.licenseNumber}
+                        </p>
+                        {review.mfo.website && (
+                          <a
+                            href={review.mfo.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-xs mt-1"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            Сайт
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Дополнительная информация о МФО */}
+                    <div className="mt-3 grid md:grid-cols-2 gap-3 text-xs text-gray-600">
+                      <div>
+                        <span className="font-medium">Возраст:</span>{" "}
+                        {review.mfo.ageFrom}-{review.mfo.ageTo} лет
+                      </div>
+                      <div>
+                        <span className="font-medium">Документы:</span>{" "}
+                        {review.mfo.documents}
+                      </div>
+                      <div>
+                        <span className="font-medium">Гражданство:</span>{" "}
+                        {review.mfo.citizenship}
+                      </div>
+                      {review.mfo.phone && (
+                        <div className="flex items-center gap-1">
+                          <Phone className="w-3 h-3" />
+                          <span>{review.mfo.phone}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {review.mfo.description && (
+                        <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600 
+                        whitespace-pre-wrap break-all">
+          <span className="font-medium">Описание:</span>{" "}
+          {review.mfo.description}
+        </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Мета информация */}

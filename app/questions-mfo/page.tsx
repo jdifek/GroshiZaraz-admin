@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { toast } from "react-toastify";
-import { SiteQuestion } from "../services/siteQuestions/siteQuestionsTypes";
+import { SiteQuestion, SiteQuestionCreateDto, SiteQuestionUpdateDto } from "../services/siteQuestions/siteQuestionsTypes";
 import SiteQuestionService from "../services/siteQuestions/SiteQuestionService";
 import QuestionModal from "../components/QuestionModal";
 import { BlueButton } from "../ui/Buttons/BlueButton";
@@ -137,12 +137,20 @@ export default function QuestionsServicePage() {
     fetchQuestions();
   }, []);
 
-  const handleSave = async (data: Partial<SiteQuestion>) => {
+  const handleSave = async (data: Partial<SiteQuestionUpdateDto>) => {
     try {
       if (modalMode === "create") {
-        await SiteQuestionService.createQuestion(data);
+        await SiteQuestionService.createQuestion(data as SiteQuestionCreateDto);
       } else if (modalMode === "edit" && selectedItem) {
-        await SiteQuestionService.updateQuestion(selectedItem.id, data);
+        const updateData: SiteQuestionUpdateDto = {
+          subject: data.subject,
+          category: data.category,
+          textOriginal: data.textOriginal,
+          textUk: data.textUk,
+          textRu: data.textRu,
+          isModerated: data.isModerated,
+        };
+        await SiteQuestionService.updateQuestion(selectedItem.id, updateData);
       }
       setIsModalOpen(false);
       setSelectedItem(null);
@@ -151,6 +159,8 @@ export default function QuestionsServicePage() {
       toast.error("Ошибка при сохранении вопроса");
     }
   };
+  
+  
 
   const handleDelete = async (id: number) => {
     if (!confirm("Удалить вопрос?")) return;

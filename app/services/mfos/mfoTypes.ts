@@ -52,6 +52,7 @@ export interface Mfo {
 
   createdAt: string;
   updatedAt: string;
+  UtmLink: string;
 }
 
 // Массив promoCodes и новые поля включены

@@ -29,6 +29,7 @@ export default class SiteQuestionService {
 
   // Обновить вопрос
   static async updateQuestion(id: number, data: SiteQuestionUpdateDto): Promise<SiteQuestion> {
+    // В data не должно быть поля answers
     return (await $api.put<SiteQuestion>(`/api/site-questions/${id}`, data)).data;
   }
 

@@ -33,3 +33,12 @@ export interface SiteQuestionUpdateDto {
   textRu?: string;
   isModerated?: boolean;
 }
+
+export interface SiteQuestionUpdateDto {
+  subject?: string;
+  category?: string;
+  textOriginal?: string;
+  textUk?: string;
+  textRu?: string;
+  isModerated?: boolean;
+}

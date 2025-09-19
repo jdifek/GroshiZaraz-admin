@@ -50,6 +50,7 @@ export default function MfoModal({
     description: "",
     ageFrom: 18,
     slug: "",
+    UtmLink: "",
     ageTo: 65,
     citizenship: "РФ",
     documents: "Паспорт РФ",
@@ -73,11 +74,49 @@ export default function MfoModal({
   useEffect(() => {
     if (mode === "edit" && mfo) {
       const { promoCodes: existingPromoCodes, ...rest } = mfo;
-      setFormData({ ...formData, ...rest });
+      setFormData({
+        name: rest.name || "",
+        rating: rest.rating || 0,
+        reviews: rest.reviews || 0,
+        logo: rest.logo || "",
+        licenseNumber: rest.licenseNumber || "",
+        isActive: rest.isActive ?? true,
+        minAmount: rest.minAmount || 0,
+        maxAmount: rest.maxAmount || 0,
+        minTerm: rest.minTerm || 0,
+        maxTerm: rest.maxTerm || 0,
+        rateMin: rest.rateMin || 0,
+        rateMax: rest.rateMax || 0,
+        approvalRate: rest.approvalRate || 0,
+        decisionTime: rest.decisionTime || "",
+        isFirstLoanZero: rest.isFirstLoanZero ?? false,
+        isInstantApproval: rest.isInstantApproval ?? false,
+        phone: rest.phone || "",
+        website: rest.website || "",
+        description: rest.description || "",
+        ageFrom: rest.ageFrom || 18,
+        slug: rest.slug || "",
+        UtmLink: rest.UtmLink || "", // ✅ тут важно правильно взять UTM
+        ageTo: rest.ageTo || 65,
+        citizenship: rest.citizenship || "РФ",
+        documents: rest.documents || "Паспорт РФ",
+        isNoIncomeProof: rest.isNoIncomeProof ?? false,
+        is24Support: rest.is24Support ?? false,
+        isSafeTransactions: rest.isSafeTransactions ?? false,
+        isFlexibleTerms: rest.isFlexibleTerms ?? false,
+        workTimeWeekdays: rest.workTimeWeekdays || "",
+        workTimeWeekend: rest.workTimeWeekend || "",
+        workTimeOnline: rest.workTimeOnline || "",
+        dailyRate: rest.dailyRate || 0,
+        commission: rest.commission || 0,
+        collateral: rest.collateral || "Не требуется",
+        decisionType: rest.decisionType || "Автоматическое",
+        application: rest.application || "Онлайн",
+      });
       setPromoCodes(existingPromoCodes || []);
     }
   }, [mode, mfo]);
-
+  
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -561,6 +600,24 @@ export default function MfoModal({
                 )}
               </div>
             </div>
+
+            {/* UTM-ссылка */}
+<div className="space-y-6">
+  <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+    Маркетинг
+  </h3>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {renderInput(
+      "UTM-ссылка",
+      "UtmLink",
+      "url",
+      undefined,
+      false,
+      "https://example.com/?utm_source=..."
+    )}
+  </div>
+</div>
+
 
             {/* График работы */}
             <div className="space-y-6">

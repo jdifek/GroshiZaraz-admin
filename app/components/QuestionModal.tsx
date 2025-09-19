@@ -1,6 +1,6 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { Dropdown } from '../ui/Dropdowns/Dropdown';
+"use client";
+import { useState, useEffect } from "react";
+import { Dropdown } from "../ui/Dropdowns/Dropdown";
 import { usePathname } from "next/navigation";
 
 interface Question {
@@ -14,7 +14,7 @@ interface Question {
   textRu?: string;
   isModerated: boolean;
   createdAt: string;
-  targetType: 'bank' | 'mfo' | 'license' | 'site';
+  targetType: "bank" | "mfo" | "license" | "site";
   targetId: number;
 }
 
@@ -22,7 +22,7 @@ interface QuestionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: Partial<Question>) => void;
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   question: Question | null;
 }
 
@@ -57,34 +57,41 @@ export default function QuestionModal({
   ];
 
   useEffect(() => {
-    if (isOpen && question && mode === 'edit') {
+    if (isOpen && question && mode === "edit") {
       setFormData({ ...question });
     } else {
       setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        category: 'Все категории',
-        textOriginal: '',
-        textUk: '',
-        textRu: '',
-        targetType: isMfoPage ? 'site' : 'mfo',
+        name: "",
+        email: "",
+        subject: "",
+        category: "Все категории",
+        textOriginal: "",
+        textUk: "",
+        textRu: "",
+        targetType: isMfoPage ? "site" : "mfo",
         targetId: isMfoPage ? 1 : 0,
         isModerated: false,
       });
     }
   }, [isOpen, question, mode, isMfoPage]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : (type === 'number' ? Number(value) : value),
+      [name]:
+        type === "checkbox"
+          ? checked
+          : type === "number"
+          ? Number(value)
+          : value,
     }));
   };
 
   const handleSelect = (name: string, value: string | number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -101,26 +108,40 @@ export default function QuestionModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-6 w-full max-w-xl mx-4 overflow-y-auto scrollbar-none max-h-[90vh]">
         <h2 className="text-xl font-bold text-gray-800 mb-4">
-          {mode === 'create' ? 'Создать вопрос' : 'Редактировать вопрос'}
+          {mode === "create" ? "Создать вопрос" : "Редактировать вопрос"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-
-          <InputField label="Имя" name="name" value={formData.name || ''} onChange={handleChange} />
-          <InputField label="Email" name="email" value={formData.email || ''} onChange={handleChange} />
-          <InputField label="Тема" name="subject" value={formData.subject || ''} onChange={handleChange} />
+          <InputField
+            label="Имя"
+            name="name"
+            value={formData.name || ""}
+            onChange={handleChange}
+          />
+          <InputField
+            label="Email"
+            name="email"
+            value={formData.email || ""}
+            onChange={handleChange}
+          />
+          <InputField
+            label="Тема"
+            name="subject"
+            value={formData.subject || ""}
+            onChange={handleChange}
+          />
 
           {/* Категория */}
           <Dropdown
             label="Категория"
-            options={categories.map(cat => ({ id: cat, name: cat }))}
-            value={formData.category || 'Все категории'}
-            onSelect={(val) => handleSelect('category', val)}
+            options={categories.map((cat) => ({ id: cat, name: cat }))}
+            value={formData.category || "Все категории"}
+            onSelect={(val) => handleSelect("category", val)}
           />
 
           <TextareaField
             label="Текст вопроса (оригинал)"
             name="textOriginal"
-            value={formData.textOriginal || ''}
+            value={formData.textOriginal || ""}
             onChange={handleChange}
           />
 
@@ -128,22 +149,33 @@ export default function QuestionModal({
           <Dropdown
             label="Тип объекта"
             options={targetTypes}
-            value={formData.targetType || 'mfo'}
-            onSelect={(val) => handleSelect('targetType', val)}
+            value={formData.targetType || "mfo"}
+            disabled={isMfoPage}
+            onSelect={(val) => handleSelect("targetType", val)}
           />
-<InputField
-  label="ID объекта (targetId)"
-  name="targetId"
-  type="number"
-  value={formData.targetId?.toString() || '0'}
-  onChange={handleChange}
-  disabled={isMfoPage}
-/>
+          <InputField
+            label="ID объекта (targetId)"
+            name="targetId"
+            type="number"
+            value={formData.targetId?.toString() || "0"}
+            onChange={handleChange}
+            disabled={isMfoPage}
+          />
 
-          {mode === 'edit' && (
+          {mode === "edit" && (
             <>
-              <TextareaField label="Текст (украинский)" name="textUk" value={formData.textUk || ''} onChange={handleChange} />
-              <TextareaField label="Текст (русский)" name="textRu" value={formData.textRu || ''} onChange={handleChange} />
+              <TextareaField
+                label="Текст (украинский)"
+                name="textUk"
+                value={formData.textUk || ""}
+                onChange={handleChange}
+              />
+              <TextareaField
+                label="Текст (русский)"
+                name="textRu"
+                value={formData.textRu || ""}
+                onChange={handleChange}
+              />
 
               <div className="flex items-center gap-2">
                 <input
@@ -186,8 +218,8 @@ function InputField({
   name,
   value,
   onChange,
-  type = 'text',
-  disabled
+  type = "text",
+  disabled,
 }: {
   label: string;
   name: string;
