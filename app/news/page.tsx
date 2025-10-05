@@ -243,6 +243,34 @@ export default function NewsPage() {
                             </p>
                           </div>
 
+{/* Изображение новости */}
+{article.image && (
+  <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+    <div className="flex items-center gap-2 mb-3">
+      <FileText className="w-4 h-4 text-gray-600" />
+      <span className="text-sm font-medium text-gray-700">
+        Изображение статьи
+      </span>
+    </div>
+    <div className="relative w-full rounded-lg overflow-hidden shadow-md group">
+      <img
+        src={article.image}
+        alt={article.title}
+        className="w-full h-64 object-cover"
+      />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+        <a
+          href={article.image}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="opacity-0 group-hover:opacity-100 px-4 py-2 bg-white/90 text-gray-900 text-sm font-medium rounded-lg hover:bg-white transition backdrop-blur-sm"
+        >
+          Открыть в полном размере
+        </a>
+      </div>
+    </div>
+  </div>
+)}
                           {/* Украинский контент, если есть */}
                           {(article.titleUk || article.bodyUk) && (
                             <div className="space-y-3">

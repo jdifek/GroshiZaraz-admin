@@ -19,6 +19,7 @@ export interface News {
   title: string;
   titleUk: string;
   slug: string;
+  image: string;
   slugUk: string;
   body: string;
   bodyUk: string;

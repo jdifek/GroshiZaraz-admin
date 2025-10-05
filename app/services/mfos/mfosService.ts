@@ -1,25 +1,29 @@
 import $api from "../http";
-import { Mfo, MfoPayload } from "./mfoTypes";
+import { Mfo } from "./mfoTypes";
 
 export default class MfoService {
-  static async createMfo(params: MfoPayload): Promise<void> {
+  static async createMfo(data: FormData): Promise<void> {
     try {
-      await $api.post('/api/mfos', params);
+      await $api.post('/api/mfos', data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
     } catch (error) {
       console.error('Ошибка при создании МФО:', error);
       throw error;
     }
   }
   
-
-  static async updateMfo(id: number, params: MfoPayload): Promise<void> {
+  static async updateMfo(id: number, data: FormData): Promise<void> {
     try {
-      await $api.put(`/api/mfos/${id}`, params);
+      await $api.put(`/api/mfos/${id}`, data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
     } catch (error) {
-      console.error(`Ошибка при обновлении МФО с id=${id}:`, error);
+      console.error('Ошибка при обновлении МФО:', error);
       throw error;
     }
   }
+  
 
   static async deleteMfo(id: number): Promise<void> {
     try {

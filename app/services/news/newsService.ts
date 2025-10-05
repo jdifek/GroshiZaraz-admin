@@ -1,15 +1,22 @@
 // services/NewsService.ts
 import $api from "../http";
-import { News, NewsFormData, NewsStatistic } from "./newsTypes";
-
+import { News, NewsStatistic } from "./newsTypes";
 export default class NewsService {
-  static async createNews(data: NewsFormData): Promise<News> {
-    const res = await $api.post<News>("/api/news", data);
+  static async createNews(formData: FormData): Promise<News> {
+    const res = await $api.post<News>("/api/news", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return res.data;
   }
 
-  static async updateNews(id: number, data: NewsFormData): Promise<News> {
-    const res = await $api.put<News>(`/api/news/${id}`, data);
+  static async updateNews(id: number, formData: FormData): Promise<News> {
+    const res = await $api.put<News>(`/api/news/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return res.data;
   }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -68,6 +69,13 @@ export default function MfoModal({
     decisionType: "Автоматическое",
     application: "Онлайн",
   });
+  const [file, setFile] = useState<File | null>(null);
+
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
+  if (e.target.files && e.target.files[0]) {
+    setFile(e.target.files[0]);
+  }
+};
 
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
 
@@ -172,23 +180,28 @@ export default function MfoModal({
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const parsedData = {
-      ...formData,
-      ...numericFields.reduce((acc, key) => {
-        const val = formData[key];
-        acc[key] = val !== "" ? Number(val) : 0;
-        return acc;
-      }, {} as Record<string, number>),
-      promoCodes,
-    } as MfoPayload;
-
+  
+    const formDataToSend = new FormData();
+  
+    // добавляем обычные поля
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSend.append(key, value as any);
+    });
+  
+    // если загружен файл — добавляем
+    if (file) {
+      formDataToSend.append("logo", file);
+    }
+  
+    // промокоды — как JSON-строка
+    formDataToSend.append("promoCodes", JSON.stringify(promoCodes));
+  
     try {
       if (mode === "create") {
-        await MfoService.createMfo(parsedData);
+        await MfoService.createMfo(formDataToSend);
         toast.success("МФО успешно создана");
       } else if (mfo?.id) {
-        await MfoService.updateMfo(mfo.id, parsedData);
+        await MfoService.updateMfo(mfo.id, formDataToSend);
         toast.success("МФО успешно обновлена");
       }
       onSubmitSuccess();
@@ -198,9 +211,9 @@ export default function MfoModal({
       toast.error("Ошибка при сохранении МФО");
     }
   };
+  
 
   if (!isOpen) return null;
-
   const renderInput = (
     label: string,
     name: keyof MfoPayload,
@@ -209,11 +222,74 @@ export default function MfoModal({
     isTextarea = false,
     placeholder = ""
   ) => (
-    <div>
+    <div className="mb-4">
       <label className="block text-sm font-medium text-gray-700 mb-1">
         {label}
       </label>
-      {isTextarea ? (
+  
+      {type === "file" ? (
+        <div className="flex items-center gap-4">
+          {!file ? (
+            <label className="group relative flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all duration-200">
+              <div className="flex flex-col items-center">
+                <svg
+                  className="w-8 h-8 mb-1 text-gray-400 group-hover:text-gray-500 transition"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <span className="text-xs text-gray-500 font-medium">Загрузить</span>
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileChange(e, name)}
+                className="hidden"
+              />
+            </label>
+          ) : (
+            <div className="relative w-32 h-32 rounded-xl overflow-hidden border-2 border-gray-200 shadow-md group">
+              <img
+                src={URL.createObjectURL(file)}
+                alt="Логотип"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-2">
+                <label className="cursor-pointer px-3 py-1.5 bg-white/90 text-gray-900 text-xs font-medium rounded-lg hover:bg-white transition backdrop-blur-sm">
+                  Изменить
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, name)}
+                    className="hidden"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setFile(null)}
+                  className="px-3 py-1.5 bg-red-500/90 text-white text-xs font-medium rounded-lg hover:bg-red-500 transition backdrop-blur-sm"
+                >
+                  Удалить
+                </button>
+              </div>
+              <div className="absolute top-1 right-1 w-5 h-5 bg-green-500 text-white text-xs rounded-full flex items-center justify-center shadow-lg">
+                ✓
+              </div>
+            </div>
+          )}
+          <div className="flex-1">
+            <p className="text-xs text-gray-500">Рекомендуемый размер: 200x200px</p>
+            <p className="text-xs text-gray-400">PNG, JPG, SVG до 2MB</p>
+          </div>
+        </div>
+      ) : isTextarea ? (
         <textarea
           name={name}
           value={formData[name] as string}
@@ -235,7 +311,6 @@ export default function MfoModal({
       )}
     </div>
   );
-
   const renderSelect = (
     label: string,
     name: keyof MfoPayload,
@@ -349,11 +424,12 @@ export default function MfoModal({
                 {renderInput(
                   "URL логотипа",
                   "logo",
-                  "url",
+                  "file",
                   undefined,
                   false,
                   "https://example.com/logo.png"
                 )}
+              </div>
                 <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-200">
                   <input
                     name="isActive"
@@ -366,7 +442,6 @@ export default function MfoModal({
                     МФО активно
                   </label>
                 </div>
-              </div>
               {renderInput(
                 "Описание",
                 "description",
@@ -672,7 +747,7 @@ export default function MfoModal({
                 <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
                   <p className="text-sm">Промокоды не добавлены</p>
                   <p className="text-xs mt-1">
-                    Нажмите "Добавить промокод" чтобы создать новый
+                    Нажмите &quot;Добавить промокод&quot; чтобы создать новый
                   </p>
                 </div>
               ) : (
